@@ -1,0 +1,1506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Library</title>
+<style>
+:root{--bg:#f7f5ef;--fg:#1d1d1b;--mute:#7b786f;--line:#e2dfd4;--card:#fffdf8;--accent:#2b4a6b;--fs:19px;--lh:1.7;--ff:Georgia,"Iowan Old Style","Palatino Linotype",Charter,serif}
+[data-t=sepia]{--bg:#f3ead4;--fg:#3f3123;--mute:#8a7a62;--line:#e0d4b6;--card:#f9f2df;--accent:#7a4b1e}
+[data-t=gray]{--bg:#e4e4e0;--fg:#161616;--mute:#66665f;--line:#cfcfc9;--card:#ececE8;--accent:#333}
+[data-t=dark]{--bg:#121212;--fg:#c8c5be;--mute:#7b7871;--line:#2a2a2a;--card:#1b1b1b;--accent:#9db7d3}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--ff);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.sans{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.hidden{display:none!important}
+
+/* Library */
+#lib{height:100%;overflow-y:auto;padding:48px 24px 64px}
+.wrap{max-width:980px;margin:0 auto}
+#lib h1{font-size:clamp(2rem,5vw,3rem);font-weight:400;margin:0 0 6px;letter-spacing:-.01em}
+#lib .sub{color:var(--mute);margin:0 0 40px;font-style:italic}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:36px 26px}
+.book{text-align:left;display:block;width:100%}
+.cover{aspect-ratio:2/3;border-radius:3px 6px 6px 3px;overflow:hidden;position:relative;box-shadow:inset 4px 0 6px -3px rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.25),0 8px 18px -8px rgba(0,0,0,.35);transition:transform .15s}
+.book:hover .cover,.book:focus-visible .cover{transform:translateY(-4px)}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover.gen{display:flex;flex-direction:column;justify-content:space-between;padding:16px 14px;color:#fff}
+.cover.gen b{font-size:1.05rem;line-height:1.25;font-weight:600}
+.cover.gen i{font-size:.8rem;opacity:.85}
+.bt{margin:12px 0 2px;font-size:.98rem;line-height:1.3}
+.ba{color:var(--mute);font-size:.85rem}
+.bp{height:2px;background:var(--line);margin-top:8px}
+.bp span{display:block;height:100%;background:var(--accent)}
+.bs{font-size:.75rem;color:var(--mute);margin-top:4px}
+
+/* Reader */
+#rd{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.top{position:absolute;top:env(safe-area-inset-top);left:0;right:0;z-index:5;display:flex;align-items:center;gap:4px;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--line);transition:transform .2s,opacity .2s}
+.top.off{transform:translateY(-110%);opacity:0;pointer-events:none}
+.top .t{flex:1;text-align:center;font-size:.9rem;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{min-width:44px;height:44px;border-radius:8px;font-size:1.05rem}
+.ib:hover{background:var(--line)}
+#vp{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;position:relative;cursor:pointer;user-select:none;-webkit-user-select:none}
+#pg{overflow:hidden;position:relative}
+#tx{height:100%;font-family:var(--ff);font-size:var(--fs);line-height:var(--lh);text-align:justify;hyphens:auto;-webkit-hyphens:auto;transition:opacity .12s;orphans:2;widows:2}
+#tx.sans{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#tx.fade{opacity:0}
+#tx p{margin:0;text-indent:1.6em}
+#tx h2+p,#tx h3+p,#tx .k+h2+p{text-indent:0}
+#tx h2{font-size:1.7em;font-weight:400;line-height:1.2;margin:1.6em 0 1em;text-align:left;break-after:avoid;letter-spacing:-.01em}
+#tx .k{font-size:.8em;color:var(--mute);margin-top:1.4em;text-align:left;font-style:italic;break-after:avoid}
+#tx h3{font-size:1.1em;margin:1.2em 0 .4em;text-align:left;break-after:avoid}
+#tx .end{text-align:center;color:var(--mute);margin-top:2em;text-indent:0}
+.foot{height:34px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 20px;font-size:.75rem;color:var(--mute);flex:none}
+.bar{height:2px;background:var(--line);flex:none}
+.bar span{display:block;height:100%;background:var(--fg);opacity:.55;width:0}
+.panel{position:absolute;z-index:6;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 40px -10px rgba(0,0,0,.4)}
+#set{top:calc(60px + env(safe-area-inset-top));right:10px;width:min(320px,calc(100% - 20px));padding:16px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;font-size:.85rem}
+.row:last-child{margin-bottom:0}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{padding:8px 13px;min-width:44px;border-right:1px solid var(--line)}
+.seg button:last-child{border:0}
+.seg button.on{background:var(--fg);color:var(--bg)}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);margin-left:6px}
+.sw.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+#toc{top:0;bottom:0;left:0;width:min(360px,88%);border-radius:0 10px 10px 0;overflow-y:auto;padding:16px 0}
+#toc h4{margin:0;padding:8px 22px 14px;font-weight:400;font-size:1.1rem;border-bottom:1px solid var(--line)}
+#toc button{display:block;width:100%;text-align:left;padding:13px 22px;font-size:.95rem;border-bottom:1px solid var(--line)}
+#toc button:hover{background:var(--line)}
+#toc button.on{color:var(--accent);font-weight:600}
+#shade{position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.3)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ============ LIBRARY ============ -->
+<main id="lib">
+  <div class="wrap">
+    <h1 id="libTitle">My Library</h1>
+    <p class="sub" id="libSub">Choose a book to start reading.</p>
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+
+<!-- ============ READER ============ -->
+<section id="rd" class="hidden" aria-label="Reader">
+  <div class="top sans" id="top">
+    <button class="ib" id="back" aria-label="Back to library">&#8592;</button>
+    <button class="ib" id="tocBtn" aria-label="Chapters">&#9776;</button>
+    <div class="t" id="bookT"></div>
+    <button class="ib" id="setBtn" aria-label="Reading settings">Aa</button>
+  </div>
+  <div id="vp"><div id="pg"><div id="tx"></div></div></div>
+  <div class="bar"><span id="barF"></span></div>
+  <div class="foot sans"><span id="fl"></span><span id="fr"></span></div>
+
+  <div id="shade" class="hidden"></div>
+  <div id="toc" class="panel sans hidden"></div>
+  <div id="set" class="panel sans hidden">
+    <div class="row"><span>Text size</span><div class="seg"><button data-a="fs-">A&minus;</button><button data-a="fs+">A+</button></div></div>
+    <div class="row"><span>Font</span><div class="seg"><button data-f="serif" style="font-family:Georgia,serif">Serif</button><button data-f="sans">Sans</button></div></div>
+    <div class="row"><span>Spacing</span><div class="seg"><button data-l="1.5">Tight</button><button data-l="1.7">Normal</button><button data-l="1.95">Airy</button></div></div>
+    <div class="row"><span>Margins</span><div class="seg"><button data-m="0">Narrow</button><button data-m="1">Normal</button><button data-m="2">Wide</button></div></div>
+    <div class="row"><span>Theme</span><div style="display:flex">
+      <button class="sw" data-t="" style="background:#f7f5ef" aria-label="Paper"></button>
+      <button class="sw" data-t="sepia" style="background:#f3ead4" aria-label="Sepia"></button>
+      <button class="sw" data-t="gray" style="background:#e4e4e0" aria-label="E-ink gray"></button>
+      <button class="sw" data-t="dark" style="background:#121212" aria-label="Dark"></button></div></div>
+  </div>
+</section>
+
+<script>
+/* =====================================================================
+   HOW TO ADD YOUR BOOKS
+   1. In Google Docs: File > Download > Plain text (.txt), or just copy.
+   2. Add a book object to BOOKS below.
+   3. Paste each chapter between the backticks of `text`.
+      - Leave a blank line between paragraphs.
+      - Start a line with "## " for a sub-heading inside a chapter.
+   4. cover: paste an image URL or a data: URI. Leave "" to auto-generate one.
+   Note: if your text contains a backtick (`) or "${", put a backslash before it.
+   ===================================================================== */
+const LIBRARY = { title: "My Library", subtitle: "Choose a book to start reading." };
+
+const BOOKS = [
+  {
+    id: "book-1",                      // unique, no spaces
+    title: "Autobioraphy of a Yogi",
+    author: "Paramhansa Yogananda",
+    cover: "",                         // image URL / data URI, or "" for generated cover
+    chapters: [
+      { title: "Mere Mata-Pita Evam Mera Bachpan", text: `
+
+Param satya ki khoj aur uske saath juda guru-shishya sambandh prachin kaal se hi Bhartiya sanskriti ki visheshata rahi hai.
+
+Is khoj ke mere apne marg ne mujhe ek Bhagavatsvaroop siddh purush ke paas pahuncha diya jinka sughad jeevan yug-yugantar ka aadarsh banne ke liye hi tarasha hua tha. Ve un mahan vibhutiyon mein se ek the jo Bharat ka sachcha vaibhav rahe hain. Aise siddhjanon ne hi har peedhi mein avatarit ho kar apne desh ko prachin Mishra (Egypt) evam Babylon ke samaan durgati ko prapt hone se bachaya hai.
+
+Mujhe yaad aata hai, mere shaishav-kaal mein pichhle janm ki ghatnaon ki smritiyan mere smritipatal par ubhar rahi thin, tathapi ye smritiyan un ghatnaon ke ghatit hone ke kram ke anusar nahi thin. Bahut pehle ke ek janm ki spasht smritiyan mujh mein jagti thin jab main Himalaya mein rehnevala ek yogi tha. Ateet ki in jhankiyon ne kisi agyaat kadi se judkar mujhe bhavishya ki bhi jhalak dikhayi.
+
+Shishu avastha ki asahay ke avamaananaon ki smriti mujhme abhi bhi bani hui hai. Chal-phir pane mein aur apni bhavnaon ko mukt roop se vyakt kar pane mein asamarth hone ke karan main vikshubdh rehta tha. Apne shareer ki akshamtayon ka bhaan hote hi prarthana ki lahren mere bheetar uthne lagti thin. Mere vyakul bhaav anek bhashaon ke shabdon mein mere man mein vyakt hote the. Vividh bhashaon ke aantarik sambhram ke beech main dheere-dheere apne logon ke Bangali shabd sunne ka abhyast hota gaya. Yeh thi shishu-mastishk ki man bahlane ki seema, jise bade log keval khilaunon aur angutha choosne tak hi seemit maante hain!
+
+Is mansik vikshubdhata aur mera saath na denevale shareer ke karan kai baar main jhallaakar aakulta se ro padta tha. Meri aakulta par parivar mein sabko hone vala vismay mujhe yaad hai. Sukhad smritiyan bhi anek hain: meri maa ka dulaar aur tutlane tatha ladkhada ke chalane ke mere aarambhik prayas. In aarambhik safaltaon ko samanyatah jaldi hi bhula diya jata hai, parantu phir bhi ye aatmavishvas ki swabhavik aadhar-shilayein hoti hain.
+
+Meri in sudurgami smritiyon ka hona koi apoorv baat nahi hai. Anek yogiyon ke vishay mein gyaat hai ki unhone janm-mrityu ke natakeey avastha parivartan mein bhi apne aatmabodh ko banaye rakha. Yadi manushya keval shareer hota to nihsanshay uski mrityu ke saath hi uska astitva samaapt ho jata. Kintu yadi yug-yugantar se siddh mahatmaon ne satya pratipadit kiya hai to manav moolatah ashariri, sarvavyapi aatma hai.
+
+Shaishavavastha ki suspasht smritiyon ka hona vilakshan to hai kintu aisi ghatnaein ati durlabh bhi nahi. Anek deshon mein yatra karte hue maine anek satyanishth stri-purushon ke mukh se unki shaishavavastha ki smritiyan suni hain.
+
+Mera janm poorvottar Bharat mein Himalaya parvat shreni ke nikat sthit Gorakhpur mein 5 January 1893 E. ko hua tha. Wahin mere jeevan ke pehle aath varsh vyateet hue the. Hum aath bachche the: chaar bhai aur chaar behnein. Main Mukundlal Ghosh,* bhaiyon mein doosra aur mata-pita ki chauthi santaan tha.
+
+Mere mata-pita Bangali Kshatriya the. Dono hi sant-prakriti ke the. Unke shant evam shaaleen daampatya prem mein kabhi koi anarthak vyavhaar vyakt nahi hua. Mata-pita ke beech aapas mein saamanjasya chaaron or chalane vale aath nanhe jeevon ke kolahal ka shant kendra tha.
+
+* 1915 mein jab main sannyas ki prachin Swami parampara mein shaamil ho gaya tab mera naam badalkar Yoganand ho gaya. 1935 mein mere guru ne mujhe Paramahansa ki uchchatar sannyas upaadhi pradaan ki (prakaran 24 aur 42 dekhein).
+
+Mere pita Shri Bhagavati Charan Ghosh swabhav se dayalu, gambheer aur kabhi-kabhi kathor the. Unse atyant pyaar karte hue bhi hum bachche unse aadaryukt doori banaye rakhte the. Ve asaadharaan ganitagy aur tarkashastravetta the tatha mukhyatah apni buddhi se hi kaam lete the. Kintu maa to sneh ki devi thin aur hamein keval prem ke dwara hi sikhati thin. Maa ke dehant ke pashchaat pitaji apni aantarik komalta adhik spasht roop se vyakt karne lage. Tab maine dekha ki unki aankhon mein prayah meri maa ki aankhon ki jhalak dikhayi padti thi.
+
+Maa ke sannidhya mein hum bachchon ka bachpan mein hi dharmgranthon ke saath katu-madhur parichay ho gaya. Anushasan ki aavashyakta padne par maa Ramayan aur Mahabharat se prasangochit kahaniyan hamein sunati thin. Aise avsaron par daant aur shiksha, dono hi saath-saath chalte the.
+
+Pitaji ke prati aadar ke prateek swaroop karyalay se unke ghar aane par unka swagat karne ke liye shaam mein maa hum bachchon ko kapde aadi pehnakar dhyanpurvak taiyar karti. Pitaji Bharat ki tatkalin badi companies mein se ek, Bengal-Nagpur Railway (B. N. R.) mein upa-adhyaksh (Vice-President) ke samkaksh pad par karyarat the. Yatra unke karya ka ek hissa thi; hamara parivar mere balyakal mein anek shaharon mein raha.
+
+Maa gareebon ki sahayata ke liye sada tatpar rahti thi. Pitaji bhi is mamle mein karunapoorna drishtikon rakhte the parantu apni aarthik seema ke andar hi vyay karna pasand karte the. Ek baar pandrah dinon mein maa ne gareebon ko khilane mein pitaji ki masik aay se adhik rakam kharch kar di.
+
+Is par pitaji ne maa se kaha: “Main tum se keval itna hi kehna chahta hoon ki kripa karke apna daandharm tum uchit seema ke andar karo.” Maa ko apne pati ki yeh saumya ulahna bhi vyathajanak lagi. Bachchon ko kisi prakar ke matbhed ka koi aabhas diye bina maa ne ek ghodagadi mangwayi.
+
+“Namaskar! Main apne mayke ja rahi hoon.” Prachin dhamki!
+
+Hum log chakit hokar vilap karne lage. Usi samay sanyogavash hamare mama wahan aa gaye. Unhone pitaji ke kaan mein fusfusakar dheere se koi paramarsh diya, nihsanshay sadiyon se chala aa raha koi upay. Pitaji ke kuch sandhijanak spashtikaran ke baad maa ne khushi-khushi ghodagadi lautaa di. Apne mata-pita ke beech mere dwara dekhe gaye ekmatra vivad ka is prakar ant hua. Parantu ek vishesh samvad mujhe yaad aata hai.
+
+“Kripa abhi-abhi ghar par aayi ek asahay mahila ko dene ke liye mujhe das rupaye deejiye.” Maa ki muskurahat mein manane ki apni ek shakti thi.
+
+“Das kislie? Ek rupaya kaafi hai.” Pitaji ne iske saath ek auchitya-samarthan bhi jod diya: “Jab mere pitaji aur dada-dadi ki achanak mrityu ho gayi tab maine gareebi ko pehli baar anubhav kiya. Meelon chalkar school jaane se pehle mera nashta hota tha keval ek chhota kela. College pahunchne tak meri avastha itni buri ho gayi ki maine ek dhani nyayadheesh se masik ek rupaye ki sahayata ke liye prarthana ki. Usne yeh kehte hue mana kar diya ki ek rupaya bhi moolyavan hota hai.”
+
+“Us ek rupaye ke mana kiye jaane ki aapko kitni kadvi yaad hai!” Maa ke hridaya se tatkal tark ubhra. “Kya aap chahte hain ki yeh mahila bhi aapke dwara in das rupayon ko mana kiye jaane ki vaisi hi dukhad smriti apne man mein rakhein jinki use teevr aavashyakta hai?”
+
+“Tum jeeti!” Parabhut pati ki sanatan bhaav bhangima ke saath pitaji ne apna batua khola aur kaha: “Yeh lo das rupaye ka note. Us mahila ko yeh meri shubhkamnaon sahit de do.”
+
+Kisi bhi naye prastav par pehle “nahin” keh dena pitaji ka swabhav tha. Itni sahajata se maa ki sahanubhuti jagane vali us aparichita ke prati pitaji ka raiya unki swabhavgat satarkata ka ek udaharan tha. Tatshan koi baat sweekar kar lene mein anichchha vastutah “soch-vichar ke baad nirnay” ke siddhant ka palan matra hai. Maine sada hi dekha ki pitaji uchit aur santulit nirnay lete the. Yadi main apne anekanek anurodhon ke paksh mein ek-do achchhe tark prastut kar deta, to ve sada hi meri ichchha poori kar dete — chahe vah ichchha chuttiyon mein bhraman-yatra ki ho ya nayi motorcycle ki.
+
+Apne bachchon ke balyakal mein pitaji anushasan mein unke saath dridhta baratte the, parantu swayam kisi vairagi ki tarah saral, satvik jeevan vyateet karte the. Udaharanarth, ve kabhi theatre nahi gaye, balki vividh adhyatmik sadhanaon mein aur Bhagavad Gita padhne mein hi unhe anand aata tha. Unhone saare sukhopabhogon ka tyag kar diya tha, yahan tak ki ve jooton ki ek jodi ka bhi tab tak prayog karte the jab tak ki vah bilkul hi prayog na karne yogya na ho jay. Motorcars sadharan chalan mein aa jaane ke baad unke beton ne caren kharid liin, parantu pitaji pratidin apne office jaane ke liye tramgadi ki sawari mein hi santusht rahe.
+
+Satta ya varchasv prapt karne ke liye dhan-sanchay karne mein pitaji ko koi ruchi nahi thi. Kolkata Urban Bank ka gathan karne ke baad swayam apne labh ke liye uske share rakhne se unhone inkaar kar diya. Unki ichchha to apne atirikt samay mein keval apne nagrik kartavya ka nirvah karne ki thi.
+
+Pitaji ke pension lekar sevanivritt hone ke kai varshon baad Bengal-Nagpur Railway ke bahi-khaton ki jaanch karne ke liye England se ek accountant mahoday Bharat aaye. Vismit jaanch-adhikari ne dekha ki pitaji ne uchit samay par ada na kiye gaye kisi bonus ke liye kabhi koi aavedan nahi kiya tha.
+
+Unhone company ko bataya: “Inhone akele teen aadmiyon ke barabar kaam kiya hai. Pichhli kshati-poorti swaroop inka 1 lakh 25 hazaar rupaya company se nikalta hai.” Company ke koshadhyaksh ne ukt rakam ka cheque pitaji ko bhej diya. Par mere pitaji ne is ghatna ko itna nagan ya mana ki ve parivar ko iski soochna dena bhi bhool gaye. Bahut baad mein mere sabse chhote bhai Vishnu ne bank dwara diye gaye vivaran mein itni badi dhanrashi jama dekhkar pitaji se iske bare mein poocha tha.
+
+“Bhautik labh mein itna ullasit kyon hon?” Pitaji ne kaha. “Samabhav ko jisne apna lakshya bana liya ho vah na to kisi labh se ullasit hota hai na hi kisi haani se dukhi. Vah jaanta hai ki manushya is sansar mein khali haath aata hai aur khali haath hi jata hai.”
+
+Apne vaivahik jeevan mein padarpan karne ke sheeghra baad hi mere mata-pita ek mahan guru, Banaras ke Lahiri Mahashay ke shishya ho gaye. Is sampark se pitaji ke pehle se hi virakt swabhav ko aur bal mila. Maa ne ek baar meri sabse badi behan Roma ko ek ullekhneey baat batayi: “Tumhare pitaji aur main santaan prapti ke liye varsh mein matra ek baar pati-patni ke roop mein saath sote hain.”
+
+Pitaji Lahiri Mahashay se Avinash Babu ke madhyam se mile the. Avinash Babu Bengal-Nagpur Railway ke ek karmachari the. Gorakhpur mein mere bachpan mein Avinash Babu mujhe anek Bhartiya santon ki man ko talleen kar dene vali kahaniyan sunaya karte the. Ve sada apne guru ki shreshthatar mahima ke vishay mein shraddhapurvak kuch-na-kuch kahkar hi apni kahani samaapt karte the.
+
+“Tumne kabhi suna hai, kin asaadharaan parishitiyon mein tumhare pitaji Lahiri Mahashay ke shishya bane the?” Garmiyon ke mausam mein ek alsaye din main aur Avinash Babu mere ghar ke ahate mein baithe the tab unhone meri utsukta jaganevala yeh prashn mujhse kiya. Maine aashabhari muskurahat ke saath na mein sir hilaya.
+
+“Tumhare janm se kai varsh pehle maine apne varishth adhikari, arthat tumhare pitaji se apne guru ka darshan karne Banaras jaane ke liye ek saptah ki chutti dene ki yachna ki. Par tumhare pitaji ne meri ichchha ka upahas kiya.
+
+“Unhone kaha: ‘Kya tum dharmik kattarvaadi banna chahte ho? Yadi jeevan mein aage badhna chahte ho to apne kaam par dhyan do.’
+
+“Jhaadiyon mein se gujarti ek pagdandi se us din udaas man liye main ghar ja raha tha ki palki par sawar tumhare pitaji se meri mulakat ho gayi. Unhone palki aur naukarom ko vida kar diya aur mere saath chalane lage. Mujhe santvana dene ke liye ve sansarik safalta ke liye prayas karne ke labh mujhe samjhane lage. Par main unki baatein beman ho kar sun raha tha. Mera hridaya baar-baar yahi pukar raha tha: ‘Lahiri Mahashay! Main aapke darshan ke bina jee nahi sakta!’
+
+“Hum log chalte-chalte ek sunsaan maidan ke kinare pahunch gaye, jahan sandhyakaleen soorya ki kirnein lahrati oonchi jangli ghaas par chamak rahi thin. Hum log us manohari drishya ko dekhne ke liye ruk gaye. Wahan us maidan mein, hum se kuch hi gaz ki doori par mere mahan guru akasmat prakat ho gaye.*
+
+“Unka swar vaataavaran mein goonj utha: ‘Bhagavati! Tum apne karmachari ke prati atyant kathor ho.’ Iske saath hi ve jis rahasyamay dhang se prakat hue the, usi rahasyamay dhang se antardhan ho gaye. Main zameen par ghutne tekkar ‘Lahiri Mahashay! Lahiri Mahashay!’ pukar raha tha. Kuch kshanon ke liye tumhare pitaji stambhit ho gaye.
+
+“‘Avinash! Main na keval tumhe chutti de raha hoon, balki Varanasi jaane ke liye main swayam bhi chutti le raha hoon. Tumhari sahayata karne ke liye jab chahe apni ichchha ke anusar prakat hone ki shakti rakhnevale in mahan Lahiri Mahashay ke darshan mujhe karne hi honge. Main apni patni ko bhi saath loonga aur in mahan guru se prarthana karunga ki ve hamein apne adhyatmik path mein deekshit karen. Kya tum hum dono ko unke paas le chaloge?’
+
+* Siddh mahatmaon ki chamatkari shaktiyon ka spashtikaran 30 ven prakaran “Chamatkaron ka Niyam” mein diya gaya hai.
+
+“‘Avashya!’ Apni prarthana ke is chamatkaarpoor n uttar ko paakar aur ghatnaon ke itne sheeghra anukool mod lene par mera man anand se gadgad ho utha tha.
+
+“Agle din shaam ko tumhare mata-pita aur main railgadi se Varanasi ke liye chal pade. Agle din hum log wahan pahunche to kuch door tak ghoda-gadi se gaye, aur phir tang galiyon mein se chalte hue mere guru ke ghar pahunche. Unka ghar aasani se dikhayi nahi padta tha. Unki chhoti-si baithak mein pravesh karne par wahan hamesha ki tarah padmasan mein baithe hue Gurudev ko humne pranam kiya. Unhone apni hridaya-vedhi aankhein jhapkai aur unhe tumhare pitaji par sthir kar diya. ‘Bhagavati! Tum apne karmachari ke prati atyant kathor ho!’ Do din pehle ghaasbhare maidan mein kahe hue wahi shabd unhone phir se dohraye. Phir unhone aage kaha: ‘Mujhe khushi hai ki tumne Avinash ko aane ki anumati di aur saath mein tum bhi apni patni ko saath lekar yahan aa gaye.’
+
+“Tumhare mata-pita ko atyant anand hua ki Gurudev ne unhe Kriya Yoga* ki deeksha di. Us pavitra darshan ke avismarniy din se hi tumhare pitaji aur main gurubhai ke rishte se ghanishth mitra rahe hain. Lahiri Mahashay ne tumhare janm mein vishesh ruchi dikhayi thi. Tumhara jeevan nishchay hi swayam unke jeevan ke saath juda rahega; Gurudev ka aashirvad kabhi nishphal nahi hota.”
+
+Mere janm ke thode hi din baad Lahiri Mahashay ne is jagat se prasthan kar liya. Pitaji ka jahan-jahan bhi sthanantran hota tha, wahan-wahan Lahiri Mahashay ki ek sundar alankrit frame mein saji hui photo hamare pooja-ghar mein devataon ke chitron aur moortiyon ke saath virajman rahti thi. Lagbhag roz hi subah aur shaam ko maa aur main us pooja-vedi ke saamne dhyan lagakar baithte the aur chandan-sikt pushp arpan karte the. Dhoop aur guggul ke saath-saath apni sanyukt bhakti dwara hum us Ishwaratva ki pooja karte the, jo Lahiri Mahashay mein poornatah abhivyakt hua tha.
+
+Unki us photo ka mere jeevan par zabardast prabhav pada. Jaise-jaise main bada hota gaya vaise-vaise mere man mein us mahan guru ka vichar adhik dridh hota gaya. Dhyan mein prayah main dekhta ki unki chhavi us chhote-se frame se bahar aa gayi hai aur jeevit roop dharan kar mere saamne baith gayi hai. Jab main unke jyotirmay shareer ke charanon ka sparsh karne ka prayas karta, tab ve badal kar punah chitra ban jate. Jab maine balyavastha se kishoravastha mein pravesh kiya to maine dekha ki frame mein jakdi Lahiri Mahashay ki chhoti-si chhavi mere man mein jeevit, gyan-pradayini upasthiti ban kar virajman ho chuki hai. Kisi uljhan ya pareeksha ki ghari mein main prayah unse prarthana karta aur apne antar mein unka santvanadayak margdarshan pata.
+
+Pehle-pehle to mujhe dukh hota tha ki ve sharirik roop mein jeevit nahi the. Kintu jaise-jaise mujhe unki gupt sarvavyapakata ka pata chalta gaya, vaise-vaise mera dukh kam hota gaya. Apne un shishyon ko, jo unke darshan ke liye ati lalayit rahte the, ve prayah likha karte the: “Jab main sada tumhare kutastha (divya drishti) ki pahunch mein hoon to mere asthi-maans ko dekhne ke liye aane ki kya aavashyakta hai?”
+
+Lagbhag 8 varsh ki aayu mein mujhe Lahiri Mahashay ki photo ke madhyam se chamatkari swasthyalaabh ka aashirvad prapt hua. Is anubhav ne mere prem ko aur bhi adhik utkat kar diya. Jab main Bengal ke Ichhapur mein apne parivarik ghar mein rah raha tha, tab mujhe haiza ho gaya. Mere bachne ki koi aasha nahi rahi. Doctor kuch bhi nahi kar pa rahe the. Mere bistar ke paas baithi maa ne bhaavvihvalata ke atirek ke saath mere sir ke upar tangi Lahiri Mahashay ki photo ki or dekhne ka mujhe ishara kiya.
+
+“Unhe man hi man pranam karo!” Ve jaanti thin ki pranam karne ke liye haath uthane ki shakti mujh mein nahi bachi thi. “Yadi tum sachmuch apni bhakti prakat karoge aur apne antar mein unka charansparsh karoge, to tumhe jeevandaan mil jayega!”
+
+Maine unki photo ki or dekha to wahan aankhein chaundhiyanewala prakhar prakash dikhayi pada jisne mere shareer aur poore kamre ko apne mein sama liya. Meri michlahat aur anya aniyantranneey lakshan samaapt ho gaye; main swasth ho gaya. Tatshan hi mujh mein itni shakti aa gayi ki apne guru mein apaar shraddha rakhnevali maa ka maine jhukkar charansparsh kiya. Maa baar-baar us chhoti-si photo par apna matha tek rahi thi.
+
+“He sarvavyapi Gurudev! Main aapki kritagya hoon ki aapke alok ne mere putra ko achchha kar diya!”
+
+Main samajh gaya ki unhone bhi us tejomay jyoti ka darshan kiya tha jiski mahima se main us sadharantaya pranghatak sabit honevali bimari se ekaak achchha ho gaya tha.
+
+Mere paas jo kuch bhi anmol cheezein hain, unmein ek vah photo bhi hai. Swayam Lahiri Mahashay dwara pitaji ko di gayi yeh photo ek pavitra spandan se yukt hai. Is photo ke peeche bhi ek chamatkarik kahani hai. Maine yeh kahani pitaji ke gurubhai Kalikumar Ray se suni thi.
+
+Aisa prateet hota hai ki Lahiri Mahashay ko apni photo khichvana achchha nahi lagta tha. Ek baar unke virodh ke bawajood unki aur unke kai shishyon ki, jinmein Kalikumar Ray bhi shaamil the, ek samuhik photo khinchi gayi. Par us samay photographer ke aashcharya ki seema na rahi jab usne dekha ki us photo mein sab shishyon ke chitra to ekdam spasht dikhayi de rahe the, parantu beech mein, jahan usne Lahiri Mahashay ka chitra hone ki sarthak aasha ki thi, koi aakriti nahi thi; vah sthan bilkul khali tha. Is vismaykari ghatna par khoob charcha hui.
+
+Ek shishya Gangadhar Babu ne, jo ek kushal photographer the, deeng mari ki Lahiri Mahashay chahe jo kar lein, ve unki photo avashya khinch sakte hain. Agle din pratahkal jab Gurudev lakdi ki bench par padmasan mein baithe the aur unke peeche ek kapde ka parda bhi laga diya gaya tha, tab Gangadhar Babu apne saaj-saman ke saath wahan pahunch gaye. Safalta ke liye sari savdhaniyan baratte hue unhone utkanthapurvak barah photo khinchi. Kintu sheeghra hi unhe dikhayi pada ki har plate par lakdi ki bench aur parde ka chitra to spasht hai, par Gurudev ki aakriti ka punah kahin pata nahi.
+
+Gangadhar Babu ka abhiman choor-choor ho gaya. Ashru bahate hue ve daude-daude Lahiri Mahashay ke paas pahunche. Kai ghanton ke baad Lahiri Mahashay ne is sargarbhit vakya ke saath apna maun toda: “Main Brahma hoon. Kya tumhara camera sarvavyapi agochaar ka chitra khinch sakta hai?”
+
+Gangadhar Babu ne kaha: “Main dekh raha hoon ki nahi khinch sakta! Parantu he sarvagy Gurudev! Aapke dehamandir ki ek photo prapt karne ki bahut ichchha hai. Meri drishti sankuchit rahi hai. Aaj tak main yeh nahi samajh paya tha ki aapmein Brahma poorn roop se vaas karta hai.”
+
+“Phir kal subah aao. Main tumhare camera ke saamne baithkar photo khinchwa loonga.”
+
+Punah photographer ne apna camera focus kiya. Is baar agochaar rahasyamayata ke aavaran se rahit us pavitra mahapurush ki aakriti plate par spasht roop se ubhar aayi. Gurudev ne iske baad kabhi apni koi photo nahi khichwayi; kam se kam maine nahi dekhi.
+
+Wahi photo is pustak mein chhapi hai.* Sanche mein dhali Lahiri Mahashay ki mukhakriti se kuch pata nahi chal pata ki ve kis kul-vansh ke the. Unki rahasyamay muskan mein Ishwar-sakshatkar ke anand ki kuch-kuch jhalak dikhayi deti hai. Bahya jagat mein naam-matra ki ruchi ka sanket deti unki adhonmeelit aankhein aantarik paramanand ka sanket karti hui aadhi band bhi hain. Is jagat ke kshudra pralobhanon se alipt ve adhyatmik sahayata ke liye apne paas aanevale jigyasuon ki adhyatmik samasyaon ke prati satat poorn jagrook rahte the.
+
+* Photo vibhag mein prishth 9 dekhein. Photo vibhag mein hi Shri Shri Lahiri Mahashay ka haath se banaya gaya chitra prishth 10 par dekhein. 1935-36 mein jab Paramahansa Yogananda ji Bharat aaye the, tab unhone ek Bangali chitrakar se apne nirdeshanusar yeh chitra mool photo ke anusar banwaya aur baad mein ise Yogoda Satsanga Society of India / Self-Realization Fellowship ke prakashanon mein prayukt karne ke liye nirdharit kiya. Mount Washington mein vah chitra Paramahansa ji ke kamre mein deewar par tang kar rakha gaya hai. (Prakashak ki tippani)
+
+Gurudev ke chitra ki mahima se swasthyalaabh karne ke thode din baad hi mujhe ek prabhavkari divya-darshan hua. Ek din pratah apne bichaune par baitha main ek gahan divaswapn mein doob gaya.
+
+“Band aankhon ke andhkar ke peeche kya hai?” Yeh anusandhanatmak vichar bade veg se mere man mein ubhar aaya. Tatshan hi meri antardrishti ke saamne prakhar prakash kaundh gaya. Mere lalat mein visteern deeptiman pat par parvat-gufaon mein dhyanasth baithe santon ki aakritiyan chhote-chhote chalachitron ki bhaanti prakat hone lagi.
+
+“Aap log kaun hain?” Maine uchch swar mein poocha.
+
+“Hum Himalaya ke yogi hain.” Is divya uttar ka anand varnaneet tha; mera hridaya pulakit ho utha.
+
+“Aah! Main bhi Himalaya mein aakar aapke jaisa banna chahta hoon!” Drishya antardhan ho gaya, parantu rajat kirnein mandalakar mein anant ki or vistarit hoti gayeen.
+
+“Yeh adbhut alok kya hai?”
+
+“Main Ishwar hoon. Main prakash hoon.” Yeh dhvani badalon ki saumya budbudahat jaisi thi.
+
+“Main aapke saath ekaakar hona chahta hoon!”
+
+Yadyapi vah Ishwariy anand kramashah ksheen hota gaya, par usse main Brahma ki sthai khoj ki virasat prapt karne mein safal hua. “Ishwar shashvat, nitya-naveen anand hai!” Yeh smriti mere hridaya-patal par is anubhav ke baad lambe samay tak bani rahi.
+
+Bachpan ki ek anya smriti asaadharaan hai, aur ullekhneey bhi hai, kyunki uska chinh aaj bhi mere haath par hai. Ek din pratahsamay main aur meri badi behan Uma apne Gorakhpur ke ghar ke ahate mein neem ke ped ke neeche baithe the. Aas-paas ke toton ko neem ke pake phal khate main nihaar raha tha aur beech mein jo samay milta us mein Uma didi mujhe Bangali ki pehli pustak padhne mein madad kar rahi thin.
+
+Uma didi ne apne pair par phoda hone ki baat batayi, aur vah us par lagane ke liye marham ki ek dibbiya le aayi. Maine us mein se thoda marham lekar apne haath par laga liya.
+
+“Tum nirog haath par marham kyon laga rahe ho?”
+
+“Baat aisi hai didi, mujhe lag raha hai ki kal mujhe yahan phoda hone vala hai.”
+
+“Chal, jhootha kahan ka!”
+
+“Didi, jab tak tum kal subah kya hota hai yeh dekh nahi leti, tab tak mujhe jhootha nahi keh sakti.” Mujhe krodh aa gaya.
+
+Uma par uska koi asar nahi pada aur usne teen baar apne vyangya ko dohraya. Ek dridh nishchay meri awaaz mein dhvanit hone laga jab maine dheere-dheere kehna shuru kiya:
+
+“Main apni ichchhashakti ke bal ke saath kehta hoon ki kal mere haath par isi jagah ek kaafi bada phoda nikal aayega; aur tumhara phoda sooj kar duguna ho jayega.”
+
+Subah mere haath par ek bahut bada phoda nikal aaya aur Uma ka phoda aakar mein duguna ho gaya. Meri behan cheekhti hui maa ke paas bhagi. “Maa! Mukund jadu tona karna seekh gaya hai!” Maa ne gambheer hokar mujh se kaha ki haani karne ke liye main shabd-shakti ka prayog kabhi na karoon.
+
+Maine maa ka vah upadesh sada hi yaad rakha hai aur uska palan kiya hai. Mere phode ka ilaj cheere se hua. Doctor ke cheere se bana chinh aaj bhi vartaman hai. Mere dahine haath par manushya ke shabd ki shakti ka nitya smaran dilata hua yeh chinh smarak ke roop mein vidyaman hai.
+
+Gahri ekagrata ke saath Uma ko kahe gaye un sadharan evam prakatatah haanirahit prateet honevale shabdon mein bomb ke sadrish visfot kar nishchit parinaam utpann karne ki (yadyapi parinaam haanikar the) paryapt shakti nihit thi. Baad mein meri samajh mein aaya ki kisi ke jeevan ko sankat se bachane ke liye vani ki visfotak spandan-shakti ka sadupyog kiya ja sakta hai aur is prakar bina chinh ya kasht rahit shalya-chikitsa ki ja sakti hai.*
+
+Hamara parivar Punjab ke Lahore† shahar mein sthanantran hua. Wahan maine Devi Kali ke roop mein Jagannata ka ek chitra prapt kiya.‡ Hamare ghar ki balcony mein is chitra ka anaupcharik mandir bana. Mere man mein anayas hi yeh nishchit vishvas paida ho gaya ki us pavitra sthan par ki gayi meri kisi bhi prarthana ko poorti ka taaj pehna diya jayega. Ek din wahan Uma ke saath khada hokar main do ladkon ko do gharon ki chhaton par patang udate dekh raha tha. In dono gharon aur hamare ghar ke beech ek bahut hi sankri gali thi.
+
+“Tum aaj itne chup kyon ho?” Uma ne khel-khel mein mujhe dhakka dekar poocha.
+
+“Main yeh soch raha hoon ki kitni adbhut baat hai ki main jo bhi mangta hoon, Jagannata mujhe de deti hain.”
+
+“Main samajhti hoon vah tumhe ve dono patangen bhi de dengi!” Meri behan upahas ki hansi hanste hue boli.
+
+* Dhvani ki anant kshamataein srijnatmak shabd ya Om se udbhoot hoti hain. Om hi sab anushaktiyon ke mool mein sthit virat spandan-shakti hai. Spasht anubhuti aur gahri ekagrata ke saath uchcharit kisi bhi shabd mein moort hone ki shakti hoti hai. Prernaprad shabdon ka baar-baar swar se ya maun uchcharan manaschikitsa ki vividh paddhatiyon mein prabhavkari paya gaya hai; iska rahasya man ki spandan-gati ko badhane mein nihit hai.
+
+† 1947 mein hue Bharat ke vibhajan mein Lahore Pakistan mein chala gaya.
+
+‡ Kali shashvat prakriti maa ke roop mein Ishwar ka prateek hai.
+
+“Kyon nahi?” Maine un patangon ko pane ke liye maun prarthana shuru kar di.
+
+Bharat mein dhagon par manja (gond aur sheeshe ka choorn) lagakar patangon ka khel khela jata hai. Pratyek patang udanevala apne pratidwandwi ki patang kaatne ka prayas karta hai. Kati hui patang chhaton ke upar se jati hai, tab use pakadne mein bada maza aata hai. Uma aur main aisi balcony mein khade the jiske upar chhat thi aur dono or deewarein bhi thin, isliye kisi kati patang ka hamare haath aana asambhav prateet hota tha, kyunki swabhavik taur par uska dhaga chhat ke upar hi latakta hua aage nikal jata.
+
+Gali ke us paar patang udanevalon ne apna khel shuru kiya. Ek dhaga kat gaya; tatshan hi patang meri disha mein lapki. Achanak hawa band ho jaane ke karan vah patang ek kshan ke liye sthir ho gayi aur isi beech uska dhaga saamne vale ghar ke upar uge nagphani ke ek ped mein ulajh gaya. Mere pakadne ke liye ek poora fanda ban gaya. Maine yeh puraskar Uma ko saump diya.
+
+“Yeh to keval ek asaadharaan sanyog tha, na ki tumhari prarthana ka uttar. Yadi vah doosri patang bhi tumhare paas aa jaye, to main manungi.”
+
+Didi ki kali aankhon se unke shabdon ki apeksha kahin adhik vismay prakat ho raha tha. Maine teevrta se apni prarthanaein jaari rakhin. Us doosre patang udanevale ke jor se jhatka marne ke karan uska dhaga bhi toot gaya. Hawa mein nachti hui patang meri or aane lagi. Mere sahayak nagphani ke ped ne phir se dhage ko ulajhakar aavashyak fanda bana diya taaki main use pakad sakoon. Maine apna yeh doosra puraskar bhi Uma ko bhent kar diya.
+
+“Sachmuch Jagannata tumhari prarthana sunti hain! Yeh sab mere liye vilakshan hai.” Didi bhaybheet mrigashavak ki bhaanti bhag gayi.
+`},
+      { title: "Maa ka Dehant aur Alaukik Taaviz", text: `
+
+Meri maa ki sabse badi ichchha mere bade bhai ke vivaah ki thi. “Aha! Jab main Anant ki patni ka mukh dekhungi tab mujhe is dharti par hi swarg mil jayega!” In shabdon mein maa ko apne vansh ko aage chalane ki prabal Bhartiya bhavna vyakt karte main prayah sunta tha.
+
+Anant ki sagai ke samay main lagbhag gyarah varsh ka tha. Maa Kolkata mein atyant ullas se vivaah ki taiyariyon mein juti hui thin. Keval pitaji aur main hi uttari Bharat mein sthit Bareilly mein apne ghar mein rah gaye the, jahan Lahore mein do varsh rahne ke baad pitaji ka sthanantran ho gaya tha.
+
+Iske poorv main apni do badi behnon Rama aur Uma ke vivaahon ka thathbaat dekh chuka tha, kintu ghar mein sabse bada putra hone ke naate Anant ke vivaah ki taiyariyan to aur bhi bade star par ho rahi thin. Maa pratidin door-door se Kolkata pahuchte sage-sambandhiyon ki aavbhagat karne mein vyast thin. Maa ne 50, Amherst Street mein liye gaye ek naye vishal ghar mein un sabke aaram-purvak theharne ki vyavastha ki thi. Saari taiyariyan poori ho chuki thin — vivaah-bhoj ke liye nana-vidh vyanjan, baarat ke saath Anant ko le jaane ke liye palki, rang-birangi battiyon ki kataarein, gale ke vishalkay haathi aur oont, Angrezi, Scottish aur Hindustani band-baje, peshewar gayak tatha nartak, vivaah-vidhi sampann karane ke liye pandit-purohit — sab kuch taiyar tha.
+
+Mangalotsav ke utsah se bhare hue pitaji aur main samay par vivaah ke liye pahunchne ka vichar kar rahe the. Parantu us shubh din se thode hi pehle maine ek amangalsuchak drishya dhyan mein dekha.
+
+Yeh Bareilly mein ardharatri ke samay tha. Main pitaji ke saath apne bangale ke baramde mein soya hua tha. Palang par lagi machchhardani ki vichitra phadphadahat-ki-si dhvani se meri neend khul gayi. Patli machchhardani ke parde khul gaye aur mujhe apni priya maa dikhayi padi.
+
+“Apne pitaji ko jagao!” Maa ki awaaz keval ek fusfusahat ki tarah lagi. “Aaj hi bhor ko char baje yahan se chalnewali pehli gadi pakdo. Yadi mujhe dekhna chahte ho to jaldi karo!” Iske baad vah chhayamurti adrishya ho gayi.
+
+“Pitaji, pitaji! Maa praan tyag rahi hain!” Mere aart swar mein vyapt bhayakulta ne unhe tatshan jaga diya. Subakte hue maine unhe saari ghatna suna di. Apne swabhav ke anusar is sthiti ko asweekar karte hue unhone mujhse kaha: “Chinta ki koi baat nahi. Yeh tumhare man ka bhram matra hai. Tumhari maa bilkul theek hai. Yadi koi dukhad samachar mil hi gaya to hum log kal chal padenge.”
+
+“Yadi aap abhi turant nahi chale to apne aap ko aap kabhi kshama nahi kar payenge!”
+
+Teevr vyatha ke karan mere munh se ye shabd bhi nikal pade: “Aur na hi main aapko kabhi kshama karunga!”
+
+Vishadpoorn pratahkaal spasht sandesh lekar aaya: “Maa gambheer roop se aswasth; vivaah sthagit; turant aaiye.”
+
+Pitaji aur main hatbuddhi hokar nikal pade. Raaste mein jahan gadi badalni padti thi, wahan mere ek chacha hum logon se mile. Aakar mein badi-badi hoti jati ek railgadi vajra-garjan ke saath hamari or aa rahi thi. Aantarik shuddhata ke karan apne aap ko gadi ke aage jhonk dene ka nishchay achanak mere man mein utha. Mujhe laga ki maa ki chhatrachhaya se vanchit ho jaane ke baad ab achanak poornatah ujad gaye is sansar ko sahne ki kshamata mujh mein nahi hai. Main maa se is sansar mein sabse priya mitra ke roop mein pyaar karta tha. Unke santvanadayak kaale nayan bachpan ki chhoti-chhoti vyatha-vednaon ke samay mera ekmatra aashray the.
+
+“Kya maa abhi tak jeevit hain?” Chacha se ek antim prashn karne ke liye main ruk gaya.
+
+Chacha ko mere chehre par chhayi adheerata ko bhaanp lene mein tanik bhi der nahi lagi. “Nihsanshay ve jeevit hain!” Par mujhe un par thoda bhi vishvas nahi hua.
+
+Hum Kolkata mein ghar pahunche to hamein mrityu ke achetan karne vale rahasya ka samna karna pada. Main mritpraya-sa hokar gir pada. Kisi prakar ki santvana ko mere hridaya ka sparsh bhi kar pane ke liye kai varsh lag gaye. Meri aart pukaron ne sakshat swarg ke dwarom ko hila diya. Akhir Jagajjanani ko aana hi pada. Unke snehsnigdha shabdon ne mere riste ghawon ko bhar diya:
+
+“Vah main hi thi jisne janm-janmantar mein anek mataon ki snehvatsalata ke madhyam se tumhari dekhbhaal ki. Khoye hue jin do sundar kaale nayanon ko tum dhoondh rahe ho, unhe meri aankhon mein dekho!”
+
+Parampriya maa ke shraddh-karm ke baad sheeghra hi pitaji aur main Bareilly laut aaye. Ateet ki smriti mein pratidin bhor mein hi main apne bangale ke saamne sthit naram, harit-swarnim hariyali ko chhaya dete khade Parijat vriksh ki dukhart hokar teerthayatra karta. Kabhi-kabhi kavyamay kshanon mein main sochta tha ki Parijat ke shwet pushp apni antarjat bhakti se harit trin-vedi par apne aap ko bikher rahe hain. Oosbinduon ke saath apne ashrubinduon ko milate hue main prayah usha se lokottar, alaukik prakash nikalta dekha karta. Ishwar ko pane ki teevr kasak se main tadap uthta. Himalaya mein chale jaane ki prabal ichchha mujh mein jag uthi.
+
+Mere ek chachere bhai Himalaya ki pavan parvat shreniyon ki yatra kar hamare yahan Bareilly aaye. Yogiyon aur swamion* ke us uchch parvat-nivas sthan ki kahaniyan maine unse utsukata-purvak suni.
+
+* Swami shabd ke Sanskrit mool ka arth hai, “vah jo apne sw ke saath ya aatma ke saath ek ho gaya hai.” (Prakaran 24 dekhein)
+
+“Chalo, Himalaya bhaag chalein.” Yeh prastav ek din maine Bareilly mein apne makaan-malik ke putra Dwarka Prasad ke samaksh rakha, parantu vah aise vicharon se sahmat nahi tha. Usne mere is vichar se mere bade bhai ko avgat kara diya jo usi samay pitaji se milne ke liye wahan aaye the. Ek chhote bachche ki is avyavaharik yojana ko hanskar taal dene ke badle Anant ne mera upahas karne ka nishchay kar liya.
+
+“Tumhare gerue kapde kahan hain? Unke bina to tum swami nahi ban sakte!”
+
+Parantu unke in shabdon se main abodhgamy roop se pulakit ho utha. Un shabdon ne ek spasht chitra meri drishti ke saamne khada kar diya, ki main sannyasi ban kar Bharat-bhraman kar raha hoon. Shayad un shabdon ne kisi poorvajanm ki smritiyon ko jaga diya tha. Chahe jo baat ho, par mujhe yeh to pata chal gaya ki prachin sannyas parampara ka gerua vastra main atyant swabhavik sahajata ke saath dharan kar sakunga.
+
+Ek din Dwarka ke saath baatchit karte hue maine anubhav kiya ki himskhalan ke saman prachand veg se Ishwar-prem ki dhara mujh mein utar rahi hai. Iske phalaswaroop shabdon ka jo dhara-pravah mujh se bahne laga uski or Dwarka ka to vishesh dhyan nahi tha, par main poore man se apne aap ko sun raha tha.
+
+Usi din dopahar ko main Himalaya ki talhati mein sthit pahadiyon mein base Nainital ki or bhaag gaya. Anant ne bhi dridh sankalp ke saath mera peecha kiya aur vibash hokar mujhe dukhi antahkaran ke saath Bareilly vapas aana pada. Mujhe keval ek hi teerthayatra karne ki anumati thi aur vah thi pratidin pratah ki Parijat vriksh ki teerthayatra. Mera hridaya apni khoyi hui dono mataon ke liye mook rudan karta raha — ek manavi mata, doosri Jagannata.
+
+Maa ke swargvas se parivar mein jo riktata utpann ho gayi vah kabhi bhari nahi ja sakti thi. Apne jeevan ke lagbhag chalees shesh varshon mein pitaji ne doosra vivaah nahi kiya. Apne balvrind ke mata-pita ki kathin bhoomika unhone swayam hi sweekar kar li aur iske nirvah mein ve hamare saath adhik komal-hriday, adhik milansar ban gaye. Shanti aur soojh-boojh ke saath hi ve vividh parivarik samasyaon ko hal karte. Karyalay se aane ke pashchaat ve kisi virakt ki bhaanti apne kaksh mein chale jate aur anandpoorn prashanti mein Kriya Yoga ka abhyas karte. Maa ke swargvas ke bahut samay baad maine aisi chhoti-chhoti baaton ka dhyan rakhne ke liye ek Angrez paricharika ko rakhne ka prayas kiya taaki pitaji ko kuch aaram mil sake. Parantu pitaji ne sir hila-hila kar apni asahmati prakat ki.
+
+“Tumhari maa ke saath hi meri seva ka ant ho gaya.” Aajeevan ekpatni-parayanata ke bhaav mein unki aankhein kho gayeen. “Main kisi bhi anya stri ki seva grahan nahi karunga.”
+
+Maa ke guzar jaane ke 14 mahine baad mujhe gyaat hua ki vah mere liye ek mahatvapoor n sandesh chhod gayi hain. Unke antim samay Anant da unke paas upasthit the aur unhone unke shabdon ko likh liya tha. Yadyapi maa ne vah sandesh mujhe ek varsh mein diye jaane ka nirdesh diya tha tathapi mere bhai ne usmein vilamb kar diya tha. Unhe sheeghra hi maa dwara unke liye pasand ki hui kanya se vivaah karne ke liye Bareilly se Kolkata prasthan karna tha. Ek din sandhya ko unhone mujhe apne paas bulaya.
+
+“Mukund! Tumhe yeh vilakshan samachar dene mein main anakani karta raha.” Unke swar mein vibashatapoor n samarpan tha.
+
+“Mujhe bhay tha ki isse tumhari grihatyag ki ichchha aur bhadak uthegi. Parantu tum vaise bhi abhi prabal Ishwar-prem se ot-prot ho. Abhi haal hi mein jab main tumhe Himalaya jate hue raaste se pakad laya, tabhi maine ek nishchit sankalp kar liya. Mujhe kisi bhi parishiti mein ab apna pavitra vachan nibhane mein der nahi karni chahiye.” Mere bhai ne mujhe ek chhoti-si dibbiya di aur maa ka sandesh mujhe sunaya.
+
+Maa ne kaha tha: “Mere priya putra Mukund! Mere ye shabd tumhare liye mera antim aashirvad hain. Ab vah samay aa gaya hai jab mujhe tumhare janm ke pashchaat ghatit alaukik ghatnaon se tumhe avgat kara dena chahiye. Jab tum meri god mein ek nanhe-se shishu matra the, tabhi mujhe tumhare nihit marg ka pata chal gaya tha. Main tab tumhe Varanasi mein apne guru ke ghar le gayi thi. Wahan shishyon ki bheed ki ot mein lagbhag chhipe hue, main dhyanasth Lahiri Mahashay ko kathinta se dekh pa rahi thi.
+
+“Tumhe dhapkiyan dete-dete main man hi man prarthana karti ja rahi thi ki Gurudev ko wahan hamari upasthiti ka gyaan ho jay aur ve tumhe aashirvad dein. Jab meri mook bhaktipoor n prarthana teevr ho gayi tab unhone aankhein kholin aur mujhe paas aane ka ishara kiya. Sabhi logon ne mujhe raasta diya; maine jakar un param-pavitra charankamaloin mein apna sir rakha. Lahiri Mahashay ne tumhe apni god mein le liya aur adhyatmik deeksha ke roop mein tumhare lalat par apna haath rakha.
+
+“‘Chhoti maa! Tumhara putra ek yogi hoga. Ek adhyatmik engine bankar vah anek aatmaon ko Ishwar ke samrajya mein le jayega.’
+
+“Sarvagy Gurudev ne meri gupt prarthana sweekar kar li. Yeh dekhkar mera hridaya anand se naach utha. Tumhare janm ke kuch pehle unhone mujhe bataya tha ki tum unke hi marg par chaloge.
+
+“Mere putra! Baad mein tumhe jab adbhut alok ke darshan ka pata bhi mujhe aur tumhari badi behan Rama ko chal gaya tha, kyunki hum dono us waqt saath ke kamre se tumhe apni shayya par nishchal baitha dekh rahi thin. Tumhare chhote-se mukhmandal par tej prakat hua tha; jab tum Bhagavan ko khojne ke liye Himalaya mein jaane ki baat kar rahe the tab tumhari awaaz mein atyant dridh nishchay dhvanit ho raha tha.
+
+“In sab madhyamon se, mere putra! Main samajh gayi thi ki tumhara marg sansarik mahatvakankshaon se door hai. Mere jeevan ki ek adwitiya ghatna ne to is par nishchayata ki muhar laga di. Wahi ghatna aaj mujhe mrityushayya se yeh sandesh tumhe dene ke liye vibash kar rahi hai.
+
+“Yeh ghatna hai Punjab mein ek sadhu ke darshan ki. Jab hamara parivar Lahore mein rahta tha, tab ek din pratahkaal naukar mere kamre mein aaya, ‘Malkin! Ek ajeeb sadhu dwar par aaya hai; kehta hai ki use “Mukund ki maa se hi milna hai.”’
+
+“In seedhe-saral shabdon se mere bheetar koi taar jhankrit ho utha. Main turant sadhu se milne bahar gayi. Unke charanon mein pranam karte samay main samajh gayi ki mere saamne koi sachcha siddh-purush khada hai.
+
+“Unhone kaha: ‘Mata! Mahan gurujan tumhe yeh bata dena chahte hain ki is prithvi par tumhara vaas ab adhik din nahi rahega. Tumhari agali bimari tumhare liye antim siddh hogi.’* Iske pashchaat thodi der ve maun rahe. Us maun ke dauran maine koi bhay ya sankat nahi, balki mahan shanti anubhav ki. Antatah vah phir kehne lage:
+
+“‘Tumhe apne paas amanat ke roop mein rakhne ke liye chandi ka ek taaviz diya jayega. Vah aaj main tumhe nahi doonga. Mere kathan ko satya pramanit karne ke liye kal jab tum dhyan kar rahi hogi tab vah tumhare haathon mein moort roop dharan kar lega. Jab tumhari mrityu ki ghari nikat aayegi tab tumhe vah taaviz apne bade bete Anant ko dekar use batana hoga ki ek varsh tak vah us taaviz ko apne paas rakhe aur tatpashchaat use tumhare dwiteey putra ko de. Mahapurushon se prapt us taaviz ke marm ko Mukund samajh lega. Use vah taaviz tab milna chahiye jab vah saari sansarik aasha-akankshaon ka parityagkar pranpan se Ishwar ki khoj karne ke liye prastut ho raha ho. Jab vah taaviz kuch varshon tak uske paas rah chuka hoga aur jab uska uddeshya poora ho chuka hoga, tab vah apne aap adrishya ho jayega. Gupt se ati gupt sthan mein bhi vah rakha ho, tab bhi vah jahan se aaya tha wahin vapas chala jayega.’
+
+* Jab is sandesh ke madhyam se mujhe pata chala ki maa apne alpayu hone ki baat ko jaanti thin, tab pehli baar meri samajh mein aaya ki kyon vah Anant ka vivaah sheeghratisheeghra karwana chahti thin. Yadyapi vivaah ke poorv hi uska dehavasan ho gaya, tathapi vivaahotsav dekhne ki unke man mein swabhavik matrisulabh aakanksha thi.
+
+“Maine us sadhu ko bhiksha arpan kar param bhaktibhaav se naman kiya. Bhiksha grahan na kar, mujhe aashirvad dekar vah chale gaye. Agle din sandhya ko jab main haath jodkar dhyan mein baithi thi, tab chandi ka ek taaviz meri hatheliyon ke beech mein prakat ho gaya, jaisa sadhu ne kaha tha. Uske sheetal, chikne sparsh se mujhe uske prakat hone ka gyaan ho gaya. Maine do varshon se adhik samay tak ise savdhani-purvak sambhalkar rakha aur ab ise Anant ke paas chhode ja rahi hoon. Mere liye koi shok mat karna kyunki mujhe mere Gurudev Ishwar ki god mein pahuncha denge. Achchha, mere bachche! Ab main chalti hoon. Jagannata teri raksha karengi.”
+
+Taaviz mere haath mein aate hi gyaan ka ujjwal prakash mujh par chha gaya; anek sushupta smritiyan jagrit ho utheen. Taaviz gol, deekhne mein kuch vichitra-sa aur prachin lagta tha. Us par Sanskrit ke akshar khude hue the. Main samajh gaya ki is janm ke jeevanpath par bhi adrishya roop se mera margdarshan karnevale mere poorvajanmon ke guruon ne ise bheja tha. Iska ek aur adhik gahan abhipray bhi tha; parantu taaviz ke bheetari rahasya ka bhed khol dena uchit nahi hoga.*
+
+* Taaviz alaukik reeti se utpann hui ek vastu thi jiski rachna is prakar adrishya tattvon se hui ho us ka is jagat se kabhi-na-kabhi adrishya ho jana anivary hai. (Prakaran 43 dekhein)
+
+Taaviz par ek mantra, arthat kai pavitra shabd khude hue the. Dhvani evam vaak arthat manav vani ki antarnihit shaktiyon par jitni gehraayi se Bharat mein anusandhan kiya gaya utna aur kahin bhi nahi kiya gaya. Saare brahmand mein jhankrit Om spandan (Bible ka “Shabd” athava “anek samudron ka garjan”) mein teen gun hain: srishti, sthiti, lay (Taittiriya Upanishad 1:8). Pratyek baar jab manav kisi bhi shabd ka uchcharan karta hai tab vah in teen mein se kisi ek gun ko karyanvit kar deta hai. Sabhi dharmashastron ke is aadesh ke peeche, ki manushya ko sada satyavachan hi kehne chahiye, yahi niyam-sangat karan hai.
+
+Taaviz par khude mantra mein, yadi uska sahi uchcharan kiya jaye, to adhyatmik drishti se labhprad spandan-shakti thi. Aadarsh roop se gathit Sanskrit varnamala mein pachaas varn hain aur pratyek varn ka ek sunirdish t, aparivartaneey uchcharan hai. Sab dhvaniyon ka boj uthane ka asafal prayas karte chhabbees aksharon ki, Latin mool se bani English varnamala ki dhvani-prateek vishayak aparyapta par George Bernard Shaw ne ek suvicharit aur has-parihas se bharpoor nibandh likha tha. Apni chir-parichit nirmamata (“English bhasha ke liye ek English varnamala banane ki khatir yadi grahayuddh bhi ho jay ... to bhi mujhe usse dukh nahi hoga.”) ke saath Shaw bayalees varnon wali varnamala apnane ka aagrah karte hain (New York ki Philosophical Library ki or se prakashit Wilson ki ‘The Miraculous Birth of Language’ drishtavya). Is prakar ki varnamala swar-sampoor n Sanskrit varnamala ke nikat pahunch jayegi, jiske pachaas varnon mein galat uchcharan ki koi sambhavna nahi hai.
+
+Sindhu Ghati mein prapt muharon ne anek vidwanon ko vartaman mein prachalit is dharana ka parityag karne ke liye vibash kiya hai ki Bharatvarsh ne apni Sanskrit varnamala Semitic srotom (dakshin-pashchim Asia ki prachin sanskritiyan) ke aadhar par banayi. Haal hi mein Mohenjo-daro aur Harappa mein kuch mahan Hindu shaharon ka utkhanan kiya gaya hai jinka “avashya hi Bharat-bhoomi par itna prachin itihas raha hoga ki vah hamein aise yug mein le ja sake jiski keval dhundhli-si kalpana hi ki ja sakti hai” (Sir John Marshall, Mohenjo-daro and the Indus Civilization, 1931).
+
+Is prithvi par susanskrit 5 varn ka atiprachin astitva ka Hindu siddhant yadi satya hai to sansar ki sabse prachin bhasha Sanskrit sabse adhik paripoorn kyon hai yeh spasht karna bhi sambhav ho jata hai (Prakaran 10 drishtavya). Asiatic Society ke sansthapak Sir William Jones kehte hain: “Sanskrit bhasha chahe jitni prachin ho, par uska gathan atyant adbhut hai. Vah Yunani bhasha ki apeksha adhik paripoorn, Latin bhasha ki apeksha adhik shabd-bahul, aur in dono bhashaon ki apeksha adhik parimarjit aur parishkrit hai.”
+
+Encyclopaedia Americana mein likha hai: “Jab se prachin gyaan-sampada ke punarudhaar ka karya shuru hua hai, tab se lekar aaj tak sanskriti ke itihas mein 18veen shatabdi ke uttarardh mein ki gayi Sanskrit bhasha ki (pashchatya vidwanon dwara) khoj jitni mahatvapoor n anya koi ghatna nahi hui. Bhasha-vigyan, tulnatmak vyakaran, tulnatmak puran sahitya, dharmvigyan .... ya to Sanskrit ki khoj ke karan hi astitva mein aaye ya uske adhyayan se atyant prabhavit hain.”
+
+Mere jeevan ki atyant dukhad ghatnaon ke beech vah taaviz antatah kis prakar adrishya ho gaya aur uska adrishya hona kis prakar mere liye gurulabh ka soochak siddh hua, is ka varnan is prakaran mein karne ki aavashyakta nahi.
+
+Kintu Himalaya mein jaane ki apni cheshtaon mein baar-baar asafal kiya gaya yeh balak taaviz ke pankhon par sawar hokar pratidin door-door tak yatra kar leta tha.
+
+`},
+{ title: "Dwishareeri Sant", text: `
+
+“Pitaji! Yadi main bina kisi dabav ke ghar lautne ka vachan doon, to kya darshan yatra ke liye Banaras ja sakta hoon?”
+
+Mere yatra-prem mein pitaji shayad hi kabhi badha bante the. Meri kishoravastha mein bhi anek shaharon aur teerthsthalon ki yatra karne ki anumati ve mujhe de dete the. Sadharantaya mere saath mere ek ya adhik mitra hote. Pitaji dwara pradat pratham shreni ke passen par hum log aaram-purvak yatra karte. Hamare parivar ke khanabadosh logon ke liye pitaji ka railway adhikari ka pad poornatah santoshprad tha.
+
+Pitaji ne mere anurodh par yathochit vichar karne ka vachan diya. Doosre din mujhe apne paas bulakar unhone Bareilly se Banaras jaane-aane ka ek pass, ek rupaye ke kuch note aur do patra dete hue kaha:
+
+“Mujhe Banaras ke apne mitra Kedarnath Babu ko ek karya ke vishay mein kuch prastav bhejna hai. Durbhagyavash unke pate ka kagaz maine kahin kho diya hai. Parantu mujhe vishvas hai ki hum dono ke mitra Swami Pranavananda ki sahayata se tum yeh patra un tak pahuncha sakoge. Swamiji mere gurubhai hain, unhone ati unnat adhyatmik avastha prapt kar li hai. Unke sang se tumhe bhi labh hoga. Yeh doosra patra unhe tumhara parichay dega.”
+
+Saath mein yeh kehte hue pitaji ki aankhein chamak utheen: “Yaad rakho, ab phir kabhi ghar se nahi bhagna, samjhe!”
+
+Apni barah varsh ki aayu ke utsah ke saath main nikal pada (yadyapi samay ne naveen drishyon aur aparichit vyaktiyon se mujhe milne vale anand mein abhi bhi koi kami nahi aane di hai). Banaras pahuchte hi main seedhe Swamiji ke nivas sthan ki or chal pada. Saamne ka dwar khula tha, main doosri manzil par sthit ek lambe hall-numa kamre mein ja pahuncha. Farsh se kuch oonchi uthi hui ek chowki par sthoolkay ek vyakti keval ek adhovastra dharan kiye hue padmasan mein baithe the. Unke hoton par shant, sundar muskan khel rahi thi. Mere avanchhit pravesh ke sankoch ko door karne ke liye kisi chir-parichit mitra ki bhaanti unhone mera swagat kiya.
+
+“Baba Anand.” Balsulabh awaaz mein unhone in shabdon ke saath mera hardik swagat kiya. Maine ghutne tek kar unka charansparsh kiya.
+
+“Kya aap hi Swami Pranavanandaji hain?”
+
+Unhone sweekararth sir hilaya. “Tum Bhagavati ke bete ho?” Isse pehle ki mujhe apni jeb se pitaji ka patra nikalne ka avsar bhi mil pata, unke shabd nikal chuke the. Aashcharyachakit hokar maine pitaji ka unke liye diya hua apna parichay patra nikal kar unke haath mein diya, jo ab nirarthak jaan padta tha.
+
+“Tumhare liye Kedarnath Babu ko main avashya dhoondh nikalunga.” Sant ne punah ek baar apni ateendriya drishti se mujhe vismit kar diya. Tatpashchaat unhone patra par ek drishti daali aur mere pitaji ke sambandh mein kuch sneh bhare udgar vyakt kiye.
+
+“Dekho, mujhe do pensionen milti hain. Ek tumhare pitaji ki sifarish se, jinke adheen main railway karyalay mein kaam karta tha. Doosri mere Param-pita ke anugrah se jinke liye maine apne jeevan ke sansarik kartavyon ko antahprerna ke anusar apna sarvottam prayas karke poorn kar diya hai.”
+
+Mujhe yeh kathan atyant goodh laga. “Param-pita se aapko kaisi pension milti hai, Swamiji? Ve kya dhan aapki god mein daal dete hain?”
+
+Swamiji hans pade. “Pension se mera abhipray hai agadh shanti — anek varshon ke gahan dhyan ka puraskar. Mujhe ab dhan ki kabhi koi ichchha nahi hoti. Meri atyalp bhautik aavashyaktayon ki poorti ho jati hai. Is doosri pension ka tatparya tum baad mein samajh jaoge.”
+
+Achanak vartaalap band kar Swamiji gambheer aur nishchal ho gaye. Kisi rahasyamay bhaav ne unhe aavrit kar liya. Prarambh mein to unki aankhein chamak utheen jaise kisi aakarshak vastu ko dekh rahi hon, baad mein nishprabh ho gayeen. Main unke is achanak maun se udvign ho gaya; unhone abhi tak mujhe yeh nahi bataya tha ki main apne pitaji ke mitra se kaise mil sakunga. Tanik bechain hokar maine us khali kamre mein drishti daudayi jismein hum dono ke atirikt aur kuch bhi nahi tha. Jis chowki par ve baithe the, us ke neeche rakhi unki kaath ki khadaun par meri drishti padi.
+
+“Chhote Mahashay! Chinta mat karo. Jin se tum milna chahte ho ve aadhe ghante mein yahan pahunch jayenge.” Yogivar mere man ko padh rahe the — us samay yeh koi badi baat bhi nahi lag rahi thi!
+
+Unhone punah gahan maun dharan kar liya. Jab meri ghadi se mujhe pata chala ki tees minat beet chuke hain tab Swamiji swayam hi uth gaye.
+
+“Lagta hai Kedarnath Babu darwaze ke nikat pahunch gaye hain,” unhone kaha. Maine seedhiyon se kisi ke upar aane ki aahat suni. Vismit abodhyata mein main achanak doob gaya; asamanjas mein mere vichar daudne lage: “Bina kisi sandeshvahak ka upyog kiye pitaji ke mitra ko yahan bulana kaise sambhav ho sakta hai? Mere yahan aane ke baad Swamiji ne to mere atirikt kisi se bhi baat nahi ki hai!”
+
+Main chupchap uthkar kamre se bahar aa gaya aur seedhiyan utarne laga. Aadhe raaste mein hi madhyam kad ke ek duble-patle, gauravarn vyakti se meri bhet hui. Ve kisi jaldi mein lag rahe the.
+
+“Kya aap Kedarnath Babu hain?” Meri awaaz mein uttejana spasht thi.
+
+“Haan. Aur tum Bhagavati ke bete ho na, jo mujhse milne ke liye yahan prateeksha kar rahe ho?” Ve mitrata-poorn dhang se muskaraye.
+
+“Mahashay! Par aap yahan kaise aaye?” Unki abodhya upasthiti se mujhe vismaykari rosh ka anubhav hua.
+
+“Aaj sab kuch rahasyamay lag raha hai! Ek ghante se bhi kam samay pehle maine Gangasnan samaapt kiya hi tha ki Swami Pranavanandaji mere paas pahunch gaye. Main soch bhi nahi sakta ki unhe kaise pata chala ki main us samay wahan tha.
+
+“‘Bhagavati ka beta mere ghar mein tumhari prateeksha kar raha hai,’ unhone kaha. ‘Kya tum mere saath chaloge?’ Main khushi se taiyar hua. Hum log haath mein haath daalkar chalane lage, kintu khadaun pehne ke bawajood bhi Swamiji aashcharyajanak dhang se mujhe peeche chhodkar aage nikal gaye, halanki main ye majboot joote pehne hue tha.
+
+“Phir Pranavanandaji ne akasmat rukkar mujh se poocha: ‘Mere ghar pahunchne mein tumhe kitna samay lagega?’
+
+“‘Lagbhag aadha ghanta.’
+
+“‘Mujhe abhi kuch aur kaam hai.’ Unhone ek rahasyamay drishti mujh par daali. ‘Ab mujhe tumhe peeche chhodkar jana hoga. Tum seedhe mere ghar pahunch jao jahan main aur Bhagavati ka beta tumhari prateeksha kar rahe honge.’
+
+“Main unse kuch keh sakoon isse pehle hi ve tezi se mere paas se nikal gaye aur bheed mein adrishya ho gaye. Main jitna tez chal sakta tha utna tez chalkar yahan pahuncha hoon.”
+
+Kedarnath Babu ke is kathan se main aur bhi hatbuddhi ho gaya. Maine unse poocha ki ve Swamiji ko kab se jaante the.
+
+“Pichhle varsh to hamari kuch mulakaten hui thin, par haal mein kabhi bhet nahi hui. Aaj punah snan-ghat par unse milkar mujhe bahut khushi hui.”
+
+“Mujhe apne kaanon par vishvas nahi ho raha hai. Mera dimaag to nahi phir raha hai? Kya aap unse manah-drishti mein mile the, ya vastav mein dekha tha, unke haath ka sparsh kiya tha aur unki padchap suni thi?”
+
+“Tum kehna kya chahte ho?” Gusse se unka chehra tamtama gaya. “Main tum se jhooth nahi bol raha hoon. Kya tum yeh nahi samajh pa rahe ho ki keval Swamiji ke dwara hi to mujhe pata chal sakta tha ki tum yahan meri prateeksha kar rahe ho?”
+
+“Par yeh dekhiye, main ek ghanta pehle yahan aaya aur tab se ab tak Swami Pranavanandaji ek kshan ke liye bhi meri drishti se ojhal nahi hue.” Maine saari kahani unhe suna di aur Swamiji aur mere beech ka vartaalap bhi unke saamne duhra diya.
+
+Unki aankhein phail gayeen. “Hum log is bhautik yug mein jee rahe hain ya swapn dekh rahe hain? Maine apne jeevan mein kabhi bhi is prakar ka chamatkar dekh pane ki aasha nahi ki thi! Main to samajhta tha yeh Swamiji keval ek sadharan manushya hain, aur ab dekhta hoon ki ye ek aur shareer bhi dharan kar sakte hain, uske dwara kaam bhi kar sakte hain!” Hum dono ne saath-saath hi Swamiji ke kamre mein pravesh kiya. Kedarnath Babu ne chowki ke neeche padi khadaun ki or ishara kiya.
+
+“Dekho! Ye wahi khadaun hain jo Swamiji ne ghat par pehni hui thin,” unhone fusfusakar kaha. “Unhone keval ek adhovastra pehan rakha tha jaisa unhone abhi pehan rakha hai.”
+
+Kedarnath Babu ne jab Swamiji ke charanon mein pranam kiya to Swamiji meri or dekhte hue vinodpoorn dhang se muskaraye.
+
+“Tum is sab se itne stambhit kyon ho? Drishya jagat ki sookshm ekat a sachche yogiyon se chhipi nahi rahti. Main sudoor Kolkata mein rahne vale apne shishyon ke saamne kshanbhar mein prakat hokar unse vartaalap kar sakta hoon. Ve bhi isi prakar sthool jagat ki pratyek badha ko apni ichchhanusar paar kar sakte hain.”
+
+Shayad mere bal-hriday mein adhyatmik utsah jagane ke uddeshya se hi Swamiji apne door-shravan aur door-darshan* ke yogbal ke bare mein mujhe batane ke liye raazi hue. Parantu utsah ke badle mujhe vismayyukt bhay ka anubhav hua. Choonki meri Ishwar-khoj ek vishesh guru Sri Yukteswarji ke margdarshan mein hi honi tay thi, jinse main abhi mila bhi nahi tha, atah Pranavanandaji ko apna guru manne ki koi pravritti mere man mein nahi uthi. Maine yeh sochte hue unki or sashankit man se dekha ki mere saamne baithe hue ve swayam hi the, ya unka pratiroop tha?
+
+* Yogiyon ne adhyatmik vigyan ke dwara jo niyam dhoondh nikale unhi niyamon ki vaidhata ki pushti aaj bhautik vigyan apne dhang se kar raha hai. Udaharanarth, 26 November 1934 ko Royal University of Rome mein manushya ki door-darshan shakti ka pradarshan kiya gaya tha. “Snayavik manovigyan (Neuro-Psychology) ke pradhyaapak Dr. Giuseppe Calligaris ne ek vyakti ke shareer ke katipay sthanon par dabav diya aur us vyakti ne deewar ki doosri or avasthit vyaktiyon aur vastuon ka sookshmatisookshm sara vivaran bata diya. Dr. Calligaris ne upasthit pradhyaapakon ko bataya ki yadi twacha ke katipay sthan-visheshon ko vikshobhit kiya jay to vyakti ki indriyatit anubhuti prapt ho jati hai, jisse vah un sab vastuo n ko dekh sakta hai jinhe vah anyatha nahi dekh sakta. Deewar ke us paar ki vastuo n ko dekhne mein saksham banane ke liye Dr. Calligaris ne nirdharit vyakti ke vakshsthal ke dahini or ek sthan vishesh par pandrah minat tak dabav diya. Dr. Calligaris ne kaha ki jab shareer ke katipay vishesh sthanon ko vikshobhit kiya jata hai, to sambandhit vyakti kitni bhi door sthit kisi bhi vastu ko dekh sakta hai, chahe usne us vastu ko pehle kabhi dekha ho ya na dekha ho.”
+
+Swamiji ne meri or aatmagyanoday karane vali drishti se dekhte hue tatha apne guru Maharaj ke vishay mein kuch prernadayak baatein batate hue meri ashanti door karne ki cheshta ki. “Jitne yogiyon ko main jaanta hoon un sab mein Lahiri Mahashay sabse mahan yogi the. Ve nardeh mein sakshat Ishwar the.”
+
+Maine man hi man socha ki jab shishya bhi ichchha-matra se ek aur rakt-maans ka shareer dharan kar sakta hai, tab uske guru ke liye kaun sa chamatkar karna asambhav hoga?
+
+“Guru ki sahayata kitni amulya hoti hai, vah suno. Main Gurudev ke ek anya shishya ke saath nitya raat ko aath ghante dhyan kiya karta tha. Din mein hum dono railway karyalay mein kaam karte the. Clerk ke karya-nirvah mein kathinai hote dekh poora samay Ish-chintan mein lagane ki meri ichchha hui. Aath varsh tak aadhi raat main dhyan mein hi bitata tha. Is sadhana ke adbhut parinaam mujhe prapt hote the, gahri adhyatmik anubhutiyon se man mein gyaan ka prakash phailta tha. Parantu us anant paramtattva aur mere beech sadaiv ek jheena parda bana rahta tha. Atimanavi ekagrata aur nishtha ke saath prayas karte rahne par bhi maine paya ki param nirvign ekatmata se main vanchit hoon. Ek din sayankal main Lahiri Mahashay ki seva mein upasthit hua aur madhyasthata ke liye maine unse prarthana ki. Hath-purvak saari raat main unse aagrah karta raha.
+
+“‘Karunasagar Gurudev! Meri aatma itni tadap rahi hai ki main us pranpriya param-premi ke pratyaksh darshan bina ab aur jeevit nahi rah sakta.’
+
+“‘To main kya kar sakta hoon? Tumhe adhik gehrai se dhyan karna padega.’
+
+“‘Main aap se prarthana karta hoon, he Prabhu, mere Swami! Main aapko apne samaksh is bhautik shareer mein prakat dekh raha hoon; mujhe aashirvad deejiye ki aapke anant swaroop mein main aapke darshan kar sakoon!’
+
+“Lahiri Mahashay ne aashirvad-mudra mein haath uthate hue kaha: ‘Tum ab jakar dhyan karo. Maine tumhare liye Brahma* se prarthana kar di hai.’
+
+“Aparimit anand se ullasit hokar main ghar lauta. Us raat dhyan mein mujhe apne jeevan ke jwalant charam lakshya ki prapti ho gayi. Ab mujhe nirantar vah adhyatmik pension mil rahi hai. Us din se phir kabhi vah anand poorn srishta Maya ke kisi parde ke peeche chhipkar meri drishti se ojhal nahi hua.”
+
+Pranavanandaji ka mukhmandal divya tej se damak raha tha. Ek alaukik shanti mere hridaya mein pravisht hui; sara bhay nasht ho gaya. Phir Swamiji ne aur ek gupt baat mujhe batayi.
+
+“Kuch mahinon baad main phir Lahiri Mahashay ke charanon mein upasthit hua aur unke aseem vardan ke liye kritagyata prakat karne ka maine prayas kiya. Phir maine doosri ek baat chhedi.
+
+* Srishta roop mein Ishwar; Sanskrit ‘brih’ se vyutpann jiska arth hai vistarit hona.
+
+“‘Dayanidhan Gurudev! Main ab office mein kaam nahi kar sakta. Kripa karke mujhe mukt kar deejiye. Brahma mujhe nirantar madmast banaye rakhta hai.’
+
+“‘Apni company se pension ke liye arji karo.’
+
+“‘Itne alpakal ki naukri ke baad main pension ke liye kya karan bata sakunga?’
+
+“‘Jo man mein aaye wahi bata do.’
+
+“Agle din maine pension ke liye aavedan de diya. Doctor ne samay-poorv pension ke liye karan poocha.
+
+“‘Kaam karte samay meri reedh mein mujh par kabu karnevali koi atyadhik teevr sanvedna uth ti hai. Vah poore shareer mein phail jati hai aur phir main apne kartavyon ka nirvah karne mein asamarth ho jata hoon.’*
+
+“Aur koi prashn kiye bina doctor ne pension ke liye mere paksh mein bahut achchhi sifarish likh di aur mujhe sheeghra hi pension mil gayi. Main jaanta hoon ki doctor aur tumhare pita sahit sab sambandhit railway adhikariyon ke madhyam se Lahiri Mahashay ki daivi ichchha hi karya kar rahi thi. Un logon ne Lahiri Mahashay ke daivi nirdesh ka apne aap hi palan kiya aur mujhe akhand Ish-chintan ke liye mukt kar diya.”
+
+* Gahan dhyan mein paramtattva ki pehli anubhuti medull a mein hoti hai aur tatpashchaat mastishk mein hoti hai. Prachand dhara ke saman chetna mein utarta paramanand sadhak ko poornatah vibhor kar deta hai, parantu bahya star par uski abhivyaktiyon ko niyantrit karna yogi seekh leta hai.
+
+Hamari is bhet ke samay Pranavanandaji poorn siddh mahatma the. Parantu unke vyavasayik jeevan ke antim dinon ki baat kai varshon pehle ki hai; us samay ve nirvikalp samadhi ko aparivartaneey avastha mein adhishthit nahi hue the. Chetna ki us paripoorn evam sthitpragya avastha mein yogi ko is jagat mein apne kisi bhi kartavya ko karne mein koi kathinai nahi hoti.
+
+Avakash grahan karne ke uparant Swami Pranavanandaji ne Pranava Gita naam se Srimad Bhagavad Gita ki ek atyant gahan gyaan-yukt teeka likhi, jo Bangali evam Hindi mein uplabdh hai.
+
+Ek se adhik shareeron mein ek saath prakat hone ki shakti ek siddhi hai jiska ullekh Patanjali ke Yoga Sutra mein hai (is pustak ka prakaran 24 drishtavya). Ek saath vividh sthanon par prakat hone ki ghatnaein yug-yugantar se anek santon ke jeevan mein pradarshit hui hain.
+
+Is asaadharaan rahasyodghatan ke uparant Swami Pranavanandaji deerghkaal tak maun rahe. Jab main bhaktibhaav se unka charansparsh kar unse jaane ke liye anumati mang raha tha, tab unhone aashirvad diya:
+
+“Tumhara jeevan sannyas aur yogmarg ke liye hai. Tumhare pitaji aur tumhare saath meri phir ek baar bhet hogi.” Anek varshon ke uparant ye dono hi bhavishyavaniyan satya siddh hui.*
+
+Chhate ja rahe andhkar mein Kedarnath Babu mere saath-saath chal rahe the. Maine unhe pitaji ka patra diya jo unhone sadak par lagi roshni ke prakash mein padha.
+
+“Tumhare pitaji ne is mein apni railway company ke Kolkata karyalay mein mujhe ek pad grahan karne ka prastav diya hai. Swami Pranavanandaji ko milnewali pensionon mein se kam se kam ek pension ka adhikari ho pana kitna sukhad hota! Parantu yeh asambhav hai; main Banaras chhod kar nahi ja sakta. Khed hai ki ek saath do shareer dharan karne ka mera samay abhi nahi aaya hai.”
+
+`},
+{ title: "Himalaya ki Or Mere Palayan Mein Badha", text: `
+
+“Koi bhi chhota-mota bahana banakar apni kaksha se bahar nikal aao aur ek ghodagadi kiraye par le lo. Hamari gali mein aisi jagah aakar theharna jahan tumhe mere ghar ka koi sadasya na dekh sake.”
+
+Himalaya mein mere saath jaane ki yojana banane vale uchch madhyamik vidyalay ke apne sahpathi Amar Mitter ko mera yeh antim nirdesh tha. Apne palayan ke liye hum logon ne agla din tay kiya tha. Anantada mujh par kadi drishti rakhte the, isliye savdhani bartana aavashyak tha. Unhe poora sandeh tha ki mere man mein bhaag jaane ki prabal ichchha hai, aur ve meri yojana ko viphal banane ke liye kritsankalp the. Taaviz chupchap apna karya karta hua mere andar adhyatmik ufaan la raha tha. Mujhe aasha thi ki Himalaya mein mujhe apne ve guru mil jayenge jinka chehra prayah mujhe apne antarman ke divya darshanon mein dikhayi deta tha.
+
+Pitaji ka sthayi roop se Kolkata mein sthanantran ho gaya tha aur ab hamara parivar wahin rah raha tha. Pitrisattak Bhartiya parampara ke anusar Anantada bhi apni navvadhu ke saath hamare ghar mein rahne aa gaye the. Wahan main attari par sthit ek chhote-se kamre mein nitya dhyan karke apne man ko Ishwaranusandhan ke liye taiyar kar raha tha.
+
+Us avismarniy din ka uday amangalkari varsha ke saath hua. Sadak par Amar ki ghoda-gadi ki awaaz sunte hi maine jaldi-jaldi ek kambal mein ek joda khadaun, do kaupin, ek japmala, Lahiri Mahashay ki photo aur Bhagavad Gita ki ek prati baandh li. Yeh potli maine teesri manzil ki apni khidki se neeche phenk diya. Main bhagte hue seedhiyon se neeche utra aur dwar par machhli kharid rahe chachaji ki bagal se aage badh gaya.
+
+“Kya jaldi hai?” Unhone sashank drishti se mujhe upar se neeche tak dekha.
+
+Bina koi uttar diye ek udaseen muskan ke saath unki or dekhte hue main gali ki or chal pada. Apni potli uthakar shadyantrakari savdhani bartata hua main Amar se ja mila. Hum gadi mein baithkar shahar ke ek bazaar kshetra Chandni Chowk mein gaye. Angrezi poshak kharidne ke liye hum kai mahinon se apne pratidin jalpan ke liye milnevale thode-thode paise bachate aaye the. Hum jaante the ki mere chalak bhai ek guptachar ki bhoomika nibha sakte hain, isliye European poshak pehankar hum unhe chakma dena chahte the.
+
+Station jate-jate raaste mein hum sabhi mere chachere bhai Jatin Ghosh, jinhe main Jatin da kehta tha, ke liye ruke. Ve naye-naye hi hamare panthanuyayi bane the aur Himalaya mein kisi guru ki sharan prapt karne ke aakankshi bane the. Hamare paas pehle se taiyar naya suit unhone pehan liya. Ab hamein koi nahi pehchan sakta, humne socha! Hamare man gahre ullas se khil uthe.
+
+“Bas, ab keval canvas jooton ki kami hai.” Main un dono ko ek dukaan par le gaya jahan rubber ke tale lage joote sajaaye gaye the. “Aisi pavitra yatra mein jeev-hatya dwara prapt hui chamde ki cheezein nahi le jani chahiye.” Apni Bhagavad Gita ki chamde ki jild aur vilayati hat par lage chamde ke feete nikal kar phenkne ke liye main bahar sadak par ruk gaya.
+
+Station par hum logon ne Bardwan ke ticket kharide. Hum Bardwan mein Himalaya ke charanon mein sthit Haridwar jaane ke liye gadi badalne vale the. Jab gadi bhi hum logon ke saman hi bhagne lagi, to maine apni kuch mahan aashaon ko shabd pradaan kiye.
+
+“Jara kalpana to karo!” Maine utsah-purvak kaha. “Mahan guruon se deeksha lekar hum log Brahmachaitanya ki samadhi ka anubhav karenge. Hamare shareeron mein aisi chumbakiya shakti paida ho jayegi ki Himalaya ke vanya pashu paltoo janwaron ki bhaanti hamare paas aayenge. Bagh hamara dulaar pane ki prateeksha mein baithi rahnewali gharelu nireeh billiyon se adhik kuch na honge!”
+
+Bhavishya ka chitra prastut karne vala yeh varnan, jise main lakshanik tatha vastavik, dono drishtiyon se chittamohak maan raha tha, Amar ke hoton par utsahpoorn muskan le aaya. Parantu Jatin da ne apni drishti doosri or ghumaa li aur khidki se bahar bhagte hue prakritik drishyon ko dekhne lage.
+
+“Paise ko teen hisson mein baant lete hain.” Jatin da ne is prastav ke saath apne deergh maun ko toda. “Bardwan mein hamein apne ticket alag-alag kharidne chahiye. Isse kisi ko sandeh nahi hoga ki hum log saath-saath bhaag rahe hain.”
+
+Main bina kisi aashanka ke sahmat ho gaya. Suryast ke samay hamari train Bardwan station par ruki. Jatin da ticket-ghar mein ghus gaye; Amar aur main platform par baithe rahe. Hum logon ne pandrah minat tak prateeksha ki, aur phir unke vishay mein nishphal poochtaach ki. Charon or khoj lene ke baad hum logon ne bhay-vyakul hokar jor-jor se Jatin da ko awaazen diin. Parantu ve to us chhote-se station ke charon or phaile andhkar mein na jaane kahan lupt ho gaye the.
+
+Main poornatah ghabraya gaya aur is aaghat se mere haath-paanv phool gaye. Bhagavan ko bhi yeh nirashajanak ghatna manzoor thi? Bhagavan ke liye mere pratham suniyojit palayan ke romanchak avsar par vishad ka nirmam saya pad chuka tha.
+
+“Amar! Hamein ghar laut jana chahiye.” Main chhote bachche ki tarah ro raha tha. “Jatin da ka nishthur prayaan anishtasuchak sanket hai. Viphal hona hi is yatra ki niyati hai.”
+
+“Yahi hai tumhara Ishwar-prem? Ek vishwasghati saathi ke roop mein li gayi chhoti-si pareeksha ko bhi tum sah nahi sakte?”
+
+Amar dwara ise Ishwariy pareeksha bataye jaane par mera man shant hua. Humne Bardwan ke suvikhyat Sitabhog aur Motichoor ka nashta kiya.
+
+Kuch hi ghanton mein hum Bareilly hokar Haridwar jaane vali gadi mein baith gaye. Agle din Mughalsarai mein humne gadi badalte hue. Jab hum platform par prateeksha kar rahe the, tab humne ek mahatvapoor n vishay par vichar-vimarsh kiya.
+
+“Amar, sambhav hai ki sheeghra hi hamein railway adhikariyon ki gahri poochtaach ka samna karna pade. Main apne bhai ki chaturai ko kam mahattva nahi deta. Parinaam chahe jo bhi ho, main jhooth nahi bolunga.”
+
+“Mukund, mera tumse itna hi anurodh hai ki tum chup rahna. Main jab unse baat karoon, to tum muskurana ya hansna nahi.”
+
+Itne mein hi ek European railway adhikari mere paas aaya. Usne ek tar-patra hila kar mujhe dikhaya jiska aashay main turant samajh gaya.
+
+“Kya tum log gusse mein ghar se bhaag rahe ho?”
+
+“Ji nahi!” Main prasann tha ki uske chune hue shabdon ne mujhe suspasht uttar dene ki anumati de di. Main jaanta tha ki krodh nahi, balki “daivi-vairagya” mere is aswabhavik vyavhaar ka karan tha.
+
+Phir vah adhikari Amar ki or muda. Un dono ke beech buddhi-chatur y ka jo dwandwa hua use sunte hue nirvikar gambheerya banaye rakhne ke anurodh ka palan karna mere liye kathin se kathintar hota gaya.
+
+Adhikari ne apni awaaz mein apne adhikar ko poori tarah dhvanit karte hue poocha: “Teesra ladka kahan hai? Chalo, sach bolo!”
+
+“Sahab! Aapne chashma pehna hua hai. Kya phir bhi aapko dikhayi nahi deta ki hum keval do hi hain?” Amar dhrishtata-purvak muskaraya. “Main koi jadugar nahi hoon ki ek teesra ladka nikal doon.”
+
+Adhikari ne, is dhrishtata se spasht roop se hadbada kar, aakraman ka naya paintra liya. “Tumhara naam kya hai?”
+
+“Mujhe Thomas kehte hain. Main Angrez mata aur Bhartiya dharmantarit Isai pita ki santaan hoon.”
+
+“Tumhare mitra ka kya naam hai?”
+
+“Main use Thomson kehta hoon.”
+
+Ab to andar hi andar meri hansi charam seema tak pahunch chuki thi. Main kisi se kuch kahe bina train ki or chal pada jo Bhagavan ki daya se prasthan karne ke liye seeti baja rahi thi. Amar bhi us adhikari ke saath mere peeche-peeche hi chala aaya jo ab uski baaton par itna vishvas karne laga tha ki usne shishtata-purvak hamein European logon ke liye nirdharit dibbe mein aaram se bitha diya. Spasht tha ki do ardh-Angrez balakon ko Hindustaniyon ke dibbe mein yatra karte dekhna uske liye kashtadayak tha. Uske wahan se vinay-purvak prasthan karne ke baad main seat par let gaya aur jor-jor se hasta raha. Ek anubhavi Angrez adhikari ko buddhi-chatur y mein maat dene ka anandpoorn santosh Amar ke chehre par vyapt tha.
+
+Platform par maine tar ko chor-drishti se padh liya tha. Tar mere bhai Anant ka tha. Usmein likha tha: “European poshak pehne teen Bangali ladke ghar se bhaagkar Mughalsarai ke marg se Haridwar ki or ja rahe hain. Mere pahunchne tak unhe kripa roke rakhein. Aapki sevaon ke liye yogya puraskar diya jayega.”
+
+“Amar! Maine tumhe kaha tha ki nishan lagaye hue time-table ko ghar mein mat chhodna.” Meri aankhon mein narazgi thi. “Mere bhaiya ko avashya hi wahan aisa koi time-table mil gaya hoga.”
+
+Mere mitra ne jhenpkar is daant ko sweekar kiya. Hum thodi der ke liye Bareilly mein ruke jahan Dwarka Prasad* Anant dwara bheji ek tar ke saath hamari prateeksha kar raha tha. Dwarka ne hamein rok rakhne ka bharpoor prayas kiya kintu maine use achchhi tarah vishvas dila diya ki humne yeh palayan hansi-mazaak ke taur par shuru nahi kiya tha. Pehle ki bhaanti is baar bhi Dwarka ne hamare saath Himalaya bhaag chalane ka prastav sweekar nahi kiya.
+
+* Prishth 21 dekhein.
+
+Usi raat jab hamari gadi ek station par khadi hui thi aur main ardhanidrit avastha mein tha, tab poochtaach karte ek aur adhikari ne aakar Amar ko jaga diya. Vah bhi “Thomas” aur “Thomson” namon ke indrajal mein phans gaya. Bhor hote-hote gadi ne hamein safalta-purvak Haridwar pahuncha diya. Hamein apni or bulate gauravshali parvat kuch doori par aspasht dikhayi de rahe the. Hum log tezi se bhagte hue station se bahar nikle aur nagar ki swatantra bheed mein pravisht ho gaye. Hamara pehla kaam tha deshi poshak dharan karna, kyunki Anantada ko kisi prakar hamare European chhadmavesh ka pata lag gaya tha. Pakde jaane ke poorvabhas mere man par bojh ban raha tha.
+
+Haridwar se turant nikal jana hi upyukt mankar humne sadiyon se anekanek santon ki charanraj se pavitra hue Rishikesh jaane ke liye ticketein kharid liin. Main pehle hi train mein baith gaya tha, jabki Amar abhi peeche platform par hi tha. Ek police wale ne pukarkar use rok liya. Vah avanchhit pratipalak hamein police station ke bangale mein le gaya aur usne hamare sab paise le liye. Usne shishtata-purvak yeh spasht kiya ki mere bade bhai ke aane tak hamein wahan rokkar rakhna uska kartavya tha.
+
+Yeh jaankar ki in do bhagodon ka gantavya sthal Himalaya tha, us sipahi ne ek adbhut ghatna sunayi.
+
+“Main dekh raha hoon ki tum santon ke deewane ho! Abhi kal hi meri jis sant se mulakat hui thi, us se bada sant tumhe kabhi nahi milega. Mere ek sahyogi aur main unse pehli baar paanch din pehle mile the. Ek vishesh hatyare ki teevr khoj mein hum Ganga ke paas gasht laga rahe the. Use zinda ya murda pakadne ka hamein aadesh tha. Us ke bare mein hamein sirf yeh hi gyaat tha ki teerthayatriton ko lootne ke liye vah sadhu ka chhadmavesh dharan kar bhram raha hai. Apne saamne thodi hi doori par humne ek aakriti dekhi jo us aparadhi ke varnan se milti-julti thi. Jab vah hamare aadesh par nahi ruka to use pakadne ke liye hum log daude. Uske peeche pahunchkar maine us par poori shakti se farse ka vaar kar diya. Uska dahina haath katkar uske shareer se lagbhag poornatah alag ho gaya.
+
+“Aashcharya yeh hai ki kisi prakar ki koi awaaz nikale bina aur us bhayankar ghaav par drishti bhi daale bina vah ajnabi apni tez gati se chalta hi raha. Jab hum lapak kar uske saamne khade ho gaye, to usne shant bhaav se kaha:
+
+“‘Jis hatyare ki tumhe talash hai, vah main nahi hoon.’
+
+“Yeh dekhkar mujhe gahra aaghat laga ki maine divya purush-se deekhnevale ek sant ke shareer ko ghayal kar diya tha. Main unke charanon mein sashtang lot gaya aur katar swar mein kshamayachna karne laga tatha tezi se nikalte khoon ki dhaar ko rokne ke liye maine apni pagdi ka kapda unhe diya.
+
+“‘Beta! Tumhari bhool swabhavik hi thi.’ Us mahapurush ne meri or daya aur sneh se dekhte hue kaha. ‘Jao aur pashchatap mat karo. Parampriya Jagannata meri dekhbhaal kar rahi hain.’ Unhone apni latakti bhuja ko pakadkar uske sthan par lagaya aur chamatkar! Vah jud gayi; aur aashcharyajanak roop se rakt-pravah bhi turant band ho gaya.
+
+“‘Teen din baad mujhse us ped ke neeche aakar milo. Tum mujhe poornatah swasth paoge. Is prakar tumhe pashchatap nahi rahega.’
+
+“Kal hi main apne sahyogi ke saath wahan gaya tha. Vah sant wahin the aur unhone hamein apni baah ka nireekshan karne diya. Wahan par na to ghaav ka koi chinh tha, na hi chot ka koi lakshan!
+
+“‘Main Rishikesh hote hue Himalaya ke nirjan pradeshon mein ja raha hoon.’ Mahatma ne wahan se turant prasthan karte hue hamein aashirvad diya. Mujhe lagta hai ki unki pavit rata se mera jeevan bhi unnat ho gaya hai.”
+
+Us afsar ne pavitra udgar ke saath apni katha samaapt ki; uske anubhav ne spashtata uske bheetar ki nayi gehrai yon ko chhoo liya tha. Ek prabhavshali dhang se usne us chamatkar ke sambandh mein chhapi hui samachar patra ki katar an mujhe di. Ek sansanikhez samachar-patra mein sadharantaya jis tarah tod-marodkar samachar prakashit kiye jate hain (khed hai ki iska Bharat mein bhi abhav nahi hai), usi tarah sanvad-data ne bhi apne vivaran mein ghatna ko kuch badha-chadha kar chhap diya tha: usmein likha tha ki sadhu ka sir hi dhad se lagbhag alag ho gaya tha!
+
+Amar ko aur mujhe atyant khed hua ki hum aise mahan yogi ke darshan-labh se vanchit rah gaye, jinhone apne par atyachar karne vale ko bhi Isa Masih ke saman kshama kar diya. Bharatvarsh pichhli do shatabdiyon se aarthik drishti se bhale hi gareeb ho gaya ho, parantu abhi bhi uske paas daivi sampada ka akshay bhandar hai. Kabhi-kabhi is police adhikari sansarik log bhi adhyatmik jagat ke gaganchumbi vyaktitvon ke anayas hi darshan pa jate hain.
+
+Apni is adbhut kahani se hamara samay bitane ke liye humne police adhikari ka dhanyavad kiya. Sambhavatah vah hamein soochit kar raha tha ki vah humse adhik bhagyavan tha: use anayas hi ek aatmagyani sant ke darshan ho gaye the, jab ki hamari utkat khoj ne hamein kisi siddh purush ke charanon mein nahi, balki ek ghatiya police station mein pahuncha diya tha!
+
+Himalaya ke kitne nikat, kintu phir bhi bandhan mein hone ke karan kitne door! Maine Amar se kaha ki is bandhan se mukt hone ke liye mera man dugune utsah se jor maar raha hai.
+
+“Avsar milte hi, yahan se khisak chale. Punyateerth Rishikesh tak to hum paidal bhi ja sakte hain.” Protsahan dene ke liye main muskaraya.
+
+Parantu mera mitra usi samay nirashavadi ban gaya tha, jaise hi humse paise ka majboot sahara chheen liya gaya tha.
+
+“Yadi hum aise khatarnak jungle se paidal chale, to us sadhu-santon ke nagar mein nahi, balki baghon ke pet mein pahunch jayenge!”
+
+Anant aur Amar ke bhai teen din baad pahunche. Amar ne mukti ke anand se apne bhai ka sasneh swagat kiya. Parantu mujhe is punarmilan mein koi ruchi nahi thi; Anant ko mujh se kathor ulahne ke atirikt aur kuch nahi mila.
+
+“Tumhare man ki bhavna main samajhta hoon.” Anantada santvanatmak shabdon mein bole. “Main tumse keval itna hi chahta hoon ki tum ek baar mere saath Banaras chalo, wahan ek vishesh sant se mil lo aur wahan se phir kuch dinon ke liye dukhit pitaji se milne Kolkata chale jao. Us ke baad tum yahan apne guru ki khoj punah aarambh kar sakte ho.”
+
+Yahan par Amar hamare vartaalap mein tapak pada; usne kaha ki mere saath punah Haridwar aane ka uska koi irada nahi hai. Vah parivarik sneh-sudha ka upbhog kar raha tha. Parantu mujhe vishvas tha ki main kabhi bhi apne guru ki khoj ka parityag nahi karunga.
+
+Hamari mandali Banaras ke liye railgadi par sawar ho gayi. Wahan mujhe apni prarthana ka ek adbhut aur pratyaksh uttar mil gaya.
+
+Anantada ne pehle se hi ek kaushalpoorn vyoohrchana kar rakhi thi. Haridwar mein mujh se milne se pehle ve Banaras mein utar gaye the aur wahan unhone ek shastrapandit se milkar mujhe usse upadesh dilane ki vyavastha kar rakhi thi. Pandit aur unke suputra ne bhi, mujhe sannyas path se virat kar dene ka prayas karne ka Anant da ko vachan de rakha tha.
+
+Anantada mujhe unke ghar le gaye. Panditji ke ati utsahi swabhavvale yuva putra ne aage badhkar aangan mein hi mera swagat kiya usne mujhe ek lambe darshanik tark-vitark mein uljha liya. Apni ateendriya drishti se mere bhavishya ko dekh pane ka dava karte hue unhone mere sannyasi banne ke vichar par asahmati prakat ki.
+
+“Yadi tum apne sadharan uttardayitvon ko tyag dene ka hath karoge to nirantar durbhagya ka shikar banoge aur Ishwar ko pane mein asamarth rahoge! Sansarik anubhav ke bina tum apne poorv karmon ko samaapt nahi kar sakte.”
+
+Uttar mein Bhagavad Gita ke sanatan shabd mere hoton par ubhar aaye:
+
+“Yadi koi atishay durachari bhi ananya bhaav se mujhe bhajta hai; to uske pichhle dushkarmon ka prabhav sheeghra hi nasht ho jata hai. Mahatma bankar vah sheeghra shashvat shanti ko prapt karta hai. He Kunti-putra, tum yeh nishchit roop se jaan lo: jo bhakt mujhmein poorn vishvas rakhta hai uska kabhi vinash nahi hota.”*
+
+Kintu us yuvak dwara dridhta-purvak ki gayi bhavishyavani ne mere vishvas ko thoda-sa hila diya tha. Apne hridaya ki poorn bhakti se maine man hi man Ishwar se prarthana ki:
+
+“Abhi yahin aur isi kshan meri saari vyagrata ko door kar mujhe uttar do, tum kya chahte ho, main sannyasi ka jeevan vyateet karoon ya sansari manushya ka?”
+
+Panditji ke ghar ki chahardewari ke nikat hi bahar maine ek udatt badan sadhu ko khade dekha. Spashtata unhone mere aur swaghosit divya drashta ke beech ka vartaalap sun liya tha, kyunki unhone aparichit hote hue bhi mujhe apne paas bulaya. Unke prashant netron se maine ek prachand shakti ko pravahit hote maine anubhav kiya.
+
+“Vats! Us moodh ki baatein mat suno. Tumhari prarthana ke pratyuttar swaroop Ishwar mujhe tumhe yeh aashwasan dene ka nirdesh de rahe hain ki tumhare jeevan ka ekmev marg sannyas hi hai.”
+
+Vismay aur kritagyata ke saath is nirnayayak sandesh par main prasannata se muskaraya.
+
+“Us aadmi se door hokar idhar chale aao!” Aangan se vah “moodh” mujhe bula raha tha. Mere us santvat margdarshak ne aashirvad mudra mein haath uthaya aur ve dheere-dheere chale gaye.
+
+* Adhyay 9, Shlok 30-31
+
+“Vah sadhu bhi tumhare saman pagal hi hai.” Yeh manojna tippani karne vale shwetkeshdhari Panditji the. Ve aur unke suputra meri or shochneey drishti se dekh rahe the. “Maine suna hai ki usne bhi Ishwar ki sandigdh khoj ke liye apna ghar-baar chhod diya hai.”
+
+Maine munh pher liya. Anant da ki or mudkar maine kaha ki main in logon se aur kisi tark mein nahi ulajhna chahta. Mere hatotsahit bhai tatkal prasthan ke liye maan gaye. Hum log sheeghra hi Kolkata jaanevali gadi par sawar ho gaye.
+
+“Shreeman Guptacharji! Yeh to batayiye ki aapko kaise pata chala ki main do saathiyon ke saath bhaga hoon?” Maine apni ubalti jigyasa shant karne ke liye ghar jate hue raaste mein Anantada se poocha. Ve shararat bhare dhang se muskaraye.
+
+“Tumhare school mein mujhe pata chala ki Amar apni kaksha se bahar chala gaya tha aur lautkar nahi aaya tha. Main agle din subah uske ghar gaya aur wahan ek nishan lagaya hua ek time-table khoj nikala. Amar ke pita usi samay ghodagadi se bahar ja rahe the aur coachwan se baatein kar rahe the.
+
+“‘Aaj mera beta school jaane ke liye mere saath gadi mein nahi aayega. Vah gayab ho gaya hai!’” Pita ne dukhbhare swar mein kaha.
+
+“‘Maine ek saathi coachwan se suna hai ki aapka beta aur do anya ladke European poshak pehne Howrah station mein ek gadi mein chadkar kahin chale gaye hain.’ Coachwan ne kaha, ‘Apne chamde ke joote unhone us coachwan ko de diye.’
+
+“Is prakar mujhe teen sootra mil gaye — time-table, teen ladkon ki mandali aur Angrezi vesh.”
+
+Anantada ke rahasyodghatanon ko main hansi aur kheejh ke milejule bhaavon ke saath sun raha tha. Coachwan ke prati hamari udarta kuch apatra daan hi thehri.
+
+“Yeh to swabhavik hi tha ki maine Amar dwara time-table mein nishan lagaye gaye shaharon ke railway-adhikariyon ko tatkal tar bhej diye. Usne Bareilly par bhi nishan lagaya tha, isliye maine wahan tumhare dost Dwarka ko tar bhej diya tha. Kolkata mein apne pados mein poochtaach karne par mujhe pata chala ki hamare chachere bhai Jatin da ek raat ke liye gayab rahe par doosre din subah hi Angrezi vesh mein vapas aa gaye the. Maine unhe khoja aur bhojan par nimantrit kiya. Unhone mere mantra-poorn vyavhaar se nihsank hokar nimantran sweekar kiya. Raaste mein sandeh-rahit dhang se main unhe ek police station mein le gaya. Wahan unhe anek police adhikariyon ne gher liya jinhe maine unki daravni surat ke karan pehle se hi chun rakha tha. Unki bhayavah drishti ke aage Jatin da apne rahasyatmak vyavhaar ka spashtikaran dene ke liye taiyar ho gaye.
+
+“‘Adhyatmik bhavnamay utsah mein main Himalaya ki or chal pada’, unhone kaha. ‘Siddh mahatmaon ke darshanon ke vichar ne mere antahkaran ko prerna se bhar diya tha. Parantu jaise hi Mukund ne kaha, “Himalaya ki gufaon mein jab hum samadhi mein baith jayenge, tab bagh bhi vashibhoot hokar hamare ird-gird paltoo billiyon ki bhaanti baithenge,” to mera sara josh thanda ho gaya aur lalat par paseene ki boondein jhalakne lagi. Maine socha: “Tab kya hoga? Yadi hamare yogbal se hinsr baghon ka swabhav nahi badal saka to kya ve hamare saath gharelu billiyon-ka-sa aacharan karenge?” Apne manaschakshu mein maine pehle se hi swayam ko kisi bagh ke pet ke balat antarvasi ke roop mein dekha; wahan sampoor n shareer ke saath ek hi baar mein pravesh karke nahi balki shareer ke vividh hisson ki anek kiston mein!’”
+
+Jatin da ke adrishya ho jaane ke karan jo mera krodh tha, vah hansi mein badal gaya. Unhone mujhe jo santap diya tha uska sara moolya railgadi mein mile lotpot karnevale spashtikaran se chukta ho gaya. Mujhe sweekar karna padega ki mujhe is baat se kuch santosh avashya hua ki Jatin da bhi police ki khatirdari se nahi bache the!
+
+“Anantada! Aap janmjat guptachar hain!” Meri vinodpoorn drishti poornatah krodh-rahit nahi thi. “Aur main Jatin da se kahunga ki mujhe khushi hai ki ve vishwasghat ke kisi uddeshya se nahi, jaisa ki prateet hota tha, balki keval aatmaraksha ki satark sahaj-pravritti se prerit hue the!”
+
+Kolkata mein ghar pahunchne par pitaji ne atyant marmsparshi dhang se mujhse anurodh kiya ki kam se kam uchch vidyalay ki padhai poori kar lene tak main apne ghoomte paanon par ankush lagaoon. Meri anupasthiti mein unhone ek santvat mahatma Pandit Swami Kevalanandaji ke niyamit hamare ghar aane ki vyavastha ki ek prem-purvak yojana banayi thi.
+
+“Ye rishitulya mahatma tumhare Sanskrit shikshak honge,” pitaji ne vishvast dhang se ghoshana ki.
+
+Pitaji ko aasha thi ki ve meri adhyatmik pipasa ek vidwan darshanik se shiksha dilakar shant kar denge. Parantu parinaam rahasyapoorn dhang se ulta hua: mere navniyukt shikshak mujhe shushk bauddhik gyaan dene ke badle meri Ishwarakanksha ke angaaron ko hawa dene lage. Pitaji ko yeh gyaat nahi tha ki Swami Kevalanandaji Lahiri Mahashay ke ek unnat shishya the. Us adwitiya guru ke sahasron shishya the jo unki amogh daivi shakti ke chumbakiya prabhav se apne aap unki or aakarshit ho gaye the. Mujhe baad mein gyaat hua ki Lahiri Mahashay Kevalanandaji ko prayah rishi kahkar sambodhit karte the.*
+
+* Jab Kevalanandaji se meri bhet hui tab unhone sannyas grahan nahi kiya tha. Samanyatah sabhi unhe “Shastri Mahashay” ke naam se sambodhit karte the. Lahiri Mahashay aur Master Mahashay (Prakaran 9) ke namon ke saath samya ke karan koi sambhram utpann na ho isliye main apne Sanskrit shikshak ka ullekh keval unke sannyasottar naam “Swami Kevalanandaji” se kar raha hoon. Unki jeevan-katha haal hi mein Bangali bhasha mein prakashit hui hai. Bangal ke Khulna zile mein 1863 mein janme Kevalanandaji ne adsath varsh ki aayu mein apne shareer ka Banaras mein tyag kiya. Unka parivarik naam Ashutosh Chatterjee tha.
+
+Lambe munghrale kesh mere shikshak ke sundar mukh-mandal ki shobha badha rahe the. Unki kali aankhein shishu-netron ki bhaanti nishchhal aur bholi thin. Unke chharahre shareer ki sab gatividhiyon mein ek prashant gambheerta thi. Sadaiv shant aur snehamay Kevalanandaji anant Brahma ke chaitanya mein dridhta ke saath sthir ho gaye the. Hum dono ke sahvas ke anek anandmay prahar gahre Kriya Yoga dhyan mein beette the.
+
+Kevalanandaji prachin shastron ke supratishthit pandit the; unke is agadh gyaan ke karan hi unhe Shastri Mahashay ki upaadhi mili thi jiske dwara ve prayah sambodhit kiye jate the. Parantu Sanskrit panditya mein meri pragati anullekhneey thi. Main sada isi suyog ki taak mein rahta tha ki kis tarah neeras vyakaran se jaan bache aur yog tatha Lahiri Mahashay ki charcha shuru ho. Mere shikshak mahoday ne ek din Lahiri Mahashay ke saath bitaye gaye apne jeevan ke bare mein kuch batane ka anugrah kiya.
+
+“Mujhe das varsh tak Lahiri Mahashay ke paas rahne ka durlabh saubhagya prapt hua tha. Banaras mein unka ghar mera ratrikaaleen isht teerthasthan tha. Neeche ke talle par saamne vali chhoti-si baithak mein ve sada virajman rahte the. Lakdi ki chowki par padmasan mein baithe hue ve apne shishyon se ek mala ki bhaanti ardhvrittakar mein ghire rahte the. Unki aankhein chamakti hui tatha Ishwariy anand se nachti rahti thin. Unki sadaiv ardhonmeelit rahnewali aankhein bheetar ke doordarshi golak mein se sada shashvat-anand ke lok mein jhankti rahti thin. Ve kadachit hi adhik samay ke liye bolte the. Yada-kada unki drishti kisi aise shishya par kendrit ho jati jise sahayata ki aavashyakta hoti thi; tab shantiprad vachan unke mukh se prakash ke himprapat ki bhaanti jharne lagte.
+
+“Gurudev ke ek drishtipat matra se mere andar ek avarnaneey shanti khil uth ti thi. Main unki sugandh se bhar jata tha jaise vah anant ke kisi padm ki sugandh ho. Unke saath anekanek dinon tak ek shabd bhi bole bina bhi rahna ek aisa anubhav tha jo mere sampoor n astitva ko parivartit kar deta. Yadi meri ekagrata mein koi adrishya badha aa khadi hoti to guru ke charanon mein dhyan karne baith jata. Wahan sabse sookshm avasthaon ka bhi mujhe sahajbodh ho jata. Aisi anubhutiyan mujhe nimntar koti ke guruon ke sannidhya mein nahi hoti thin. Gurudev Ishwar ke sajeev mandir the jinke guptdwar bhakti ke madhyam se sabhi shishyon ke liye khule rahte the.
+
+“Lahiri Mahashay shastron ke pustakeey teekakar nahi the. Ve sahaj hi ‘daivi pustakalay’ mein doobki laga lete the. Shabdon ka phen aur vicharon ki fuharen unki sarvagya ta ke fakkare se phoot padte the. Vedon* mein yugon pehle astaman hue gahan darshanon ke vigyan ke rahasyon ko kholne ka adbhut kaushal unhe prapt tha. Prachin shastron mein ullekh it chetna ke vividh staron ko samjhane ka anurodh karne par ve muskarakar sweekar kar lete the.
+
+“‘Main abhi un avasthaon mein pravesh karta hoon aur apni anubhutiyan tumhe batata hoon.’ Is prakar ve un guruon se bilkul vipreet the jo shastron ko kanthasth kar bina kisi vastavik anubhuti ke apni kalpana se hi unka arth batate hain.
+
+“‘Shlokon ka arth tumhe jis roop mein samajh aaye, usi prakar unki vyakhya karo.’ Mitbhashi Gurudev prayah apne paas baithe kisi shishya ko yeh nirdesh dete. ‘Main tumhare vicharon ko parichalit karunga taaki sahi arth tumhare mukh se uchcharit ho.’ Is prakar Lahiri Mahashay ki anek anubhutiyon ko unke vividh shishyon ne vist rit bhashyon sahit lipibaddh kar liya.
+
+“Kisi baat par aankh band kar vishvas kar lene ki salah Guruvar kabhi nahi dete the. ‘Shabd khokhle hain,’ ve kehte the. ‘Ishwar ki upasthiti ke dridh vishvas ko dhyan mein apne paramanandmay sampark se prapt karo.’
+
+“Shishya ki samasya chahe jo bhi ho, us ke samadhan ke liye Gurudev Kriya Yoga ke abhyas ka hi paramarsh dete the.
+
+“‘Tumhara margdarshan karne ke liye jab main is shareer mein nahi rahoonga tab bhi is yaugik kunji ka samarthy a kam nahi hoga. Yeh pravidhi bhavy prernaon ki tarah jild baandhkar, almari mein rakhkar, bhool jaane ki vastu nahi hai. Kriya Yoga ke madhyam se anavarat apne muktipath par chalte jao. Jis (Kriya) ki shakti iske abhyas mein nihit hai.’
+
+“Main swayam Kriya ko manav ke abhi tak swatah prayas dwara anant Ishwar ki khoj ke liye vikasit sadhanon mein sabse adhik prabhavshali manta hoon.” Kevalanandaji ne is utsahpoorn praman ke saath apna kathan samapan kiya. “Is ke abhyas se sabhi manushyon mein chhipe sarvavyapi Ishwar Lahiri Mahashay aur unke anek shishyon ki deh mein pratyaksh roop mein avasthit hue prakat.”
+
+Isa Masih ki tarah ek chamatkar Lahiri Mahashay dwara Kevalanandaji ki upasthiti mein hua. Ek din unhone vah kahani mujhe sunayi. Saamne mez par padi Sanskrit ki pustakon se hati unki aankhein sudoor kahin lagi hui thin.
+
+“Ek drishtihin shishya Ramu ke liye main karunardrata anubhav karne laga. Kya uski aankhon ki jyoti kabhi lautkar nahi aa sakti, jab vah itni shraddha evam nishtha ke saath hamare Gurudev ki seva kar raha tha, jinmein Ishwaratva apne poorn tej ke saath deeptiman tha? Ek din subah main Ramu se baat karna chah raha tha, parantu vah shanti-purvak ghanton tak Gurudev par pankha jhalta raha. Antatah jab vah kamre se bahar nikla to main uske peeche ho liya.
+
+“‘Ramu! Tum kab se andhe ho?’
+
+“‘Janm se hi, Mahashay! Meri aankhon ko kabhi bhi sooryadarshan ka saubhagya prapt nahi hua.’
+
+“‘Hamare sarvashaktiman guru tumhari sahayata kar sakte hain. Ek baar unse prarthana to karo.’
+
+“Agle din Ramu kuch sankoch-purvak Lahiri Mahashay ki seva mein upasthit hua, kintu apne atul adhyatmik aishvarya mein sharirik sampada ko jodne ka anurodh karna use lagbhag lajjasp ad lag raha tha.
+
+“‘Gurudev! Brahmand ko prakash denevala Ishwar aap mein vidyaman hai. Main aapse prarthana karta hoon ki us ki jyoti meri aankhon ko bhi pradaan karen taaki main soorya ke gaun tej ko dekh sakoon.’
+
+“‘Ramu! Kisi ne mujhe kathin parishiti mein daalne ki yojana banayi hai. Mere paas kisi ko swasth karne ki koi shakti nahi hai.’
+
+“‘Gurudev! Aapmein virajman anant Ishwar nishchay hi mujhe swasth kar sakte hain.’
+
+“‘Yeh to sachmuch alag baat hai, Ramu! Ishwar ki koi seema nahi hai. Vah jo taron ko chamak deta hai aur shareer-koshikaon mein rahasyamay pranshakti sancharit karta hai, nishchay hi vah tumhare netron ko bhi jyoti pradaan kar sakta hai.’ Tatpashchaat Gurudev ne Ramu ke mathe par dono bhaunhon ke beech mein sparsh kiya.*
+
+* Divya chakshu ya triteeya netra ka sthan. Mrityu ke samay manushya ki chetna sadharantaya isi pavitra sthan ki or aakrisht ho jati hai; mritakon ki aankhein upar ki or uthi hone ka yahi karan hai.
+
+“‘Apne man ko yahan kendrit rakho aur saat dinon tak barambar Ramnaam ka jap karo. Soorya ka vaibhav tumhare liye vishesh ushakal ka drishya prastut karega.’
+
+“Aur ek saptah mein theek aisa hi hua. Ramu ne prakriti ke sundar roop ko pratham baar dekha. Sarvagy Gurudev ne apne shishya ko Ramnaam japne ka aadesh diya kyunki Ram hi uske ishtadevata the. Ramu ke vishvas ne bhakti se joti hui zameen ka kaam kiya jismein Gurudev ka sthayi roop se swasth kar dene vala shaktishali beej ankurit ho gaya.”
+
+Kevalanandaji ne kshanbhar maun rahne ke baad guru ke charanon mein ek aur shraddhasuman arpit kiya.
+
+“Lahiri Mahashay ne jitne bhi chamatkar kiye, un sab mein ek baat spasht roop se pata chalti thi ki unhone aham tattva* ko kabhi bhi swayam ko karan-tattva ya karta nahi manne diya. Sarvochch rog-nivaarak shakti, arthat Ishwar ke prati poorn aatmasamarpan ke karan Gurudev us shakti ka apne mein se mukt roop se pravahit hona sulabh bana dete the.
+
+* Ahamtattva ya ahankar (shabdashah, main karta hoon) hi manushya aur uske srashta ke beech prateet honevale viyog ya dvaitvad ka mool karan hai. Ahankar manushya ko Maya ke adheen kar deta hai jiske karan karma karnewala (ahamtattva) hi karan hone ka aabhas hota hai; aur srisht jeev apne ko hi srashta mante hain.
+
+Naiva kinchitkaromeeti yukto manyeta tattvavit |  
+Pashyan shrinvan sprishan jighran ashnan gacchan svapan shvasan || 8 ||  
+Pralapan visrijan grihnann unmishan nimishann api |  
+Indriyani indriyartheshu vartanta iti dharayan || 9 ||  
+
+— Srimad Bhagavad Gita Adhyay 5
+
+Tattva ko jaannevala, Ishwar ke saath ek hone ke karan swayamev anubhav karta hai ki “main swayam kuch bhi nahi karta” — jab ki vah dekhta hai, sunta hai, chalta hai, sota hai, shwas leta hai, bolta hai, asweekar karta hai, rakhta hai, aankhein kholta aur band karta hai — kyunki vah samajh jata hai ki ye to keval indriyan hain jo (prakriti dwara karyanvit hokar) indriya-vishayon mein apna-apna kaam kar rahi hain.
+
+Prakrityaiva cha karmani kriyamanani sarvashah |  
+Yah pashyati tathatmanam akartaram sa pashyati || 29 ||  
+
+— Srimad Bhagavad Gita Adhyay 13
+
+“Jo purush sampoor n karmon ko sab prakar se prakriti ke dwara hi kiye jate hue dekhta hai aur aatma ko akarta dekhta hai, vahi yatharth dekhta hai.”
+
+“Lahiri Mahashay ne jin anekanek shareeron ko chamatkarpoorn dhang se swasth kiya unhe antatah chitagni ki jwalaon ka bhakshya ban na hi pada. Parantu unhone logon ke antar mein jo adhyatmik jagriti utpann ki, jo Isa-saman shishya taiyar kiye, wahi unke ajaramar chamatkar hain.”
+
+Main Sanskrit ka vidwan kabhi nahi bana, Kevalanandaji ne mujhe usse bhi bhavy-divya bhasha padha di.
+
+Ajo’pi sannavyayatma bhutanam ishvaro’pi san |  
+Prakritim svam adhishthaya sambhavamy atmamayaya || 6 ||  
+
+— Srimad Bhagavad Gita Adhyay 4
+
+Main ajanma aur avinashi-swaroop hote hue bhi tatha samast praniyon ka Ishwar hote hue bhi apni prakriti ko adheen karke apni yogmaya se prakat hota hoon.
+
+Daivim hy esha gunamayi mama maya duratyaya |  
+Mam eva ye prapadyante mayam etam taranti te || 14 ||  
+
+— Srimad Bhagavad Gita Adhyay 7
+
+Yeh alaukik arthat ati adbhut trigunmayi meri Maya badi dustar hai; parantu jo log keval mujh ko hi nirantar bhajte hain, ve is Maya ko langh jate hain arthat sansar se tar jate hain.
+
+`},{ title: "Chapter Five", text: `
+Gandhbaba ke Chamatkari Pradarshan
+
+“Is sansar mein har vastu ki ek vishesh ritu aur har kaam ka ek samay hota hai.”*
+
+Apne man ko santvana dene ke liye Solomon† ka yeh gyaan us samay mujhe prapt nahi tha; ghar se bahar jahan kahin bhi main ghoomne jata, meri aankhein apne ird-gird mere liye niyat guru ko dhoondhti rahti. Parantu meri high school ki padhai poorn hone tak meri unse bhet na ho saki.
+
+Amar ke saath Himalaya ki or palayan aur Sri Yukteswarji ke mere jeevan mein aagman ke mahan divas ke beech do varsh vyateet ho gaye. Is beech main anek sadhu santon se mila — “Gandhbaba”, “Baghswami”, Nagendranath Bhadudi, Master Mahashay, aur vishvavikhyat Bangali vaigyanik Jagadish Chandra Bose.
+
+Gandhbaba ke saath meri bhet ki do bhoomikayein thin; inmein se ek saamanjasyapoor n thi aur doosri vinodpoorn.
+
+“Ishwar saral hai. Anya sab kuch jatil hai. Prakriti ke sapeksh jagat mein nirpeksh moolyon ki aasha mat karo.”
+
+Jab main mandir mein Kali Mata** ki moorti ke saamne maun khada tha tab yeh darshanik nishkarsh komal swar mein mere kaanon mein pravisht hua.
+
+* Bible: Madhopadeshak 3:1
+
+† Israel ke Isai-poorv dasvi shatabdi ke ek prakrimi raja. Unhone itni vivekyukt buddhi aur nyaypoorn reeti se rajya kiya ki unka naam buddhimani ka samanarthak ban gaya.
+
+** Kali Mata prakriti mein vyapt akshay aadhar ka prateek hai. Paramparagat roop se unhe paramsatta arthat Bhagavan Shiv ki bhoomishayi deh ke upar khadi chaturbhuji stri ke roop mein chitrit kiya jata hai, kyunki prakriti ya hum prapanchamay vishva ki samast kriyaein nirgun Brahma se utpann hoti hain. Char bhujaein srishti mein nihit dvait ke mool aadhar-bhoot gunon ka pratinidhitva karti hain — do kalyanakari, do vinashkari.
+
+Palatkar maine dekha to mere samaksh ek lambe kad ka vyakti khada tha jiske kapdon se, ya unke abhav se, aisa lagta tha ki vah koi parivrajak sadhu tha.
+
+“Aapne sachmuch mere vicharon ke sambhram ko jaan liya!” Main kritagyata-purvak muskaraya. “Prakriti ke kalyanakar aur bhayankar roopon ki uljhan ne, jinka prateek Kali hai, mujhse adhik buddhiman logon ko bhi asamanjas mein daal diya hai.”
+
+“Bahut hi kam log uske rahasya ka bhed pate hain! Achchha aur bura to pratyek manushya ki buddhi ko chunauti denevali vah paheli hai jise jeevan ne uske saamne ek Sphinx* ki bhaanti rakh diya hai. Is paheli ko suljhane ka koi prayas bhi kiye bina adhikansh log apni mrityu ke roop mein iska dand bhar dete hain. Yeh dand aaj bhi utna hi lagu hota hai jitna Thebes ke dinon mein tha. Kabhi-kabhar ekadh atyant uchch vyaktitva parajay asweekar kar deta hai. Dvait ki Maya† se vah advait ka avibhajit satya kheench leta hai.”
+
+“Aap ke shabdon mein dridh vishvas dikhta hai, Maharaj!”
+
+“Gyaanprapti ke teevr dukhdayi marg, arthat satyanishth aatmapareekshan ka maine deerghkaal tak abhyas kiya hai. Aatmapareekshan ya apne vicharon par nirantar nirmam drishti rakhna, ek kathor aur jhakjhorne vala anubhav hai. Yeh balvan se balvan ahankar ko bhi choor-choor kar deta hai. Parantu sachcha atmavishleshan ganit ke niyamon ki bhaanti siddh purush utpann karne ka karya karta hai. Apne vicharon se ati prem evam vyaktigat manyataon mein dridhta ka marg ahankariyon ka nirmaan karta hai jo Ishwar aur srishti ki apne dhang se vyakhya karna apna adhikar samajhte hain.”
+
+“Aisi ahankaryukt maulikata ke saamne to satya nishchit hi vinamrata-purvak peeche hat jata hai,” maine kaha. Mujhe is charcha mein anand aa raha tha.
+
+“Manushya jab tak apne duragrahon se mukt nahi ho jata, tab tak vah kisi shashvat satya ko nahi samajh sakta. Shatabdiyon se jama ho rahe keechad mein sana manavi man asankhya sansarik mayabhramon se vyapt ghrinajanak jeevan se bharpoor hai. Yahan yuddhshetra ki bheeshan ladai bhi feeki pad jati hai jab manushya pehli baar apne antah-shatruon ka virodh karta hai. Ye koi sadharan marne vale shatru nahi hain jinhe susajjit senaon ki sahayata se kabu mein kiya ja sake. Vishakt pranghatak astron se susajjit ye sarvavyapi, aviram karya karnevale andh vasnaon ke sipahi manushya ka neend mein bhi peecha karte hue hum sab ko dharashayi kar dene ka avsar khojte rahte hain. Vicharheen hai vah manushya jo sarvasamanya niyati ke aage aatmasamarpan kar apne aadarshon ka gala ghot deta hai. Kya use napunsak, nishpran, manavjati par kalank ke atirikt aur kuch kaha ja sakta hai?”
+
+“Poojyavar! Kya vishrant, kinkartavyavimoodh janasadharan ke liye aapke man mein koi sahanubhuti nahi hai?”
+
+Sadhu Maharaj palbhar ke liye chup rahe, phir seedha uttar dena taalkar bole:
+
+“Adrishya Ishwar, jo saare sadgunon ka bhandar hai, aur drishyaman manushya, jismein prayah ek bhi sadgun nazar nahi aata — in dono se ek saath prem karna prayah vyakti ko chakara deta hai. Parantu vilakshan buddhi ka samarthy a bhi kam nahi hota. Antahkaran ka shodh sheeghra hi sab logon ke man ki ekat a ko prakat kar deta hai — swarthi uddeshyon ki samanta. Kam se kam is ek arth mein manav ki vishvabandhuta ka parichay milta hai. Ahankar ko poornatah pachhad dene vala yeh samanta ka aavishkar manushya ke man mein bhayachakit vinamrata utpann karta hai. Yeh vinamrata vikasit hote-hote aatma ki niramaykarini shaktiyon ke anusandhan ki or koi dhyan na denevale apne jatibandhavon ke prati sahanubhuti mein parivartit ho jati hai.”
+
+“Maharaj! Sab yugon ke sant aap hi ke saman jagat ke dukhon se vyakul hue hain.”
+
+“Keval tuccha vyakti hi doosron ke jeevan ke dukhon ke prati sanvedansheelata kho baith ta hai kyunki vah apne hi sankirn dukhon mein dooba rahta hai.” Sadhu ka ugra roop kafi saumya ho gaya tha. “Jo kisi doctor dwara ki janevali cheer-phaad ki bhaanti apne vicharon ki cheerphaad kar man ka gahra pareekshan karega, vahi apne bheetar sabke liye daya vikasit hoti dekhega. Tab use ahankar ki nitya kolahalkari mangon se mukti mil jayegi. Aisi hi manobhoomi par Ishwar ka prem khilta hai. Tab vah jeev apne srashta ki or mudta hai, kisi aur baat ke liye nahi to keval apni vyatha ki tadap mein yeh poochne ke liye: ‘Kyon, Prabhu, kyon?’ Dukh ke manmardanakari kode kha-khakar manushya antatah us Vidhata ke samaksh pahunch hi jata hai jiska saundarya matra hi manushya ko apni or aakrisht karne ke liye paryapt hai.”
+
+Ukt sadhu aur main Kolkata ke Kalighat mandir mein vartaalap kar rahe the jahan main us mandir ka vikhyat saundarya evam bhavyata dekhne gaya tha. Mandir ki alankarik shobha ki or haath se ishara karte hue us saare vaibhav ko sadhu ne nishprayojya thehraya.
+
+“Eentein aur gara hamein koi shravaneey sur nahi suna sakte; keval antar se uthne vali awaaz se hi hridaya ke kapaat khulte hain.”
+
+Man ko aakrisht karnewali dhoop ka anand lene ke liye hum pravesh dwar ki or gaye jahan bhakton ke jhundon ka aavagaman chal raha tha.
+
+“Tum abhi yuva ho.” Sadhu Maharaj kuch sochte hue meri or dekh rahe the. “Bharat bhi yuva hai. Prachin rishiyon ne adhyatmik jeevan sheeli ke amit aadarsh sthapit kiye the. Unke mahan upadesh aaj ke samay aur desh ke liye paryapt hain. Unke anushasan-niyam na to aaj ke lokachar ke viruddha hain, na hi aise hain ki bhautikvad ki dhoortata ko bhi kritrim lagen aur isiliye aaj bhi Bharat par unki pakad majboot hai. Lajjit panditgan jitne kaal ka hisab laga sakte hain, usse bhi kahin adhik kaal se — sahasrabdiyon se — sanshayasheel samay ne Vedon ki yogyata ki pushti ki hai. Inhe apni virasat ke roop mein grahan karo.”
+
+Jab main is vakpatu sadhu se savinay vida le raha tha tab unhone ek ateendriya anubhuti mujhe batayi:
+
+“Yahan se jaane ke baad tumhe aaj ek asaadharaan anubhav hoga.”
+
+Mandir ke ahate se bahar nikal kar main niruddeshya yoon hi chalane laga. Mudkar doosre ek raaste par badha hi tha ki ek purane parichit se bhet ho gayi. Ye mahashay un mahabhagon mein se ek the jinki sambhashan shakti samay ki or koi dhyan na dete hue anant kaal ka aalingan karti hai.
+
+“Main tumhe jaldi hi chhod doonga,” usne vachan diya, “yadi tum jaldi-jaldi mujhe hamare bichhudne ke baad ke varshon mein kya-kya hua vah sab bata do.”
+
+“Parasparvirodhi baatein! Ab to mujhe jana hi padega.”
+
+Parantu usne mera haath pakad liya aur thoda-thoda karke mujhse jankari lene laga. Ye bhookhe bhediye se kam nahi hai, maine kautuk se man hi man socha; jitna adhik main batata jata tha utna hi adhik samachar jaanne ki uski bhookh badhti jati thi. Man hi man main jaldi chhutkara pane ka koi upay karne ki prarthana Maa Kali se karne laga.
+
+Achanak vah mujhe chhodkar jaane laga. Maine thandi saans li aur use vachalta ka jwar phir kahin chadh na aaye, is bhay se duguni gati se chalane laga. Apne peeche drutgati ki padchap sunnkar maine apni gati aur badha di. Mudkar peeche dekhne ka sahas mujhse nahi hua. Parantu ek chhalang lagakar vah mere saath ho liya aur anand se usne mera kandha pakad liya.
+
+“Main tumhe Gandhbaba ke bare mein batana to bhool hi gaya. Ve us saamne vale makaan mein rahte hain.” Kuch hi gaz ki doori par sthit ek makaan ki or usne ishara kiya. “Unse avashya milo; bade dilchasp aadmi hain. Tumhe koi asaadharaan anubhav ho sakta hai. Achchha! Chalta hoon,” aur vah sachmuch chala gaya.
+
+Kalighat mandir mein lagbhag inhi shabdon mein sadhu dwara ki gayi bhavishyavani mere mastishk mein kaundh uthi. Kautuhalvash main us makaan ke andar gaya to mujhe ek prashast daalan mein le jaya gaya. Wahan ek mote naranji rang ke galeeche par kafi log idhar-udhar baithe hue the, jaise sadharantaya Bharat mein baithte hain. Ek aadaryukt fusfusahat mere kaanon se takrayi:
+
+“Wahan jo cheete ki khal par baithe hain, vahi Gandhbaba hain. Ve kisi gandhheen phool mein kisi bhi phool ki prakritik sugandh bhar sakte hain ya kisi murjhaye phool ko phir se taza kar sakte hain ya kisi manushya ki twacha se manohari sugandh nikalwa sakte hain.”
+
+Maine seedhe us sant ki or dekha; unki drishti bhi usi samay mujhpar sthir hui. Ve krishnavarn aur sthoolkay the. Unke chehre par dadhi thi aur aankhein badi-badi tatha tejasvi thin.
+
+“Beta! Tumhe dekhkar main prasann hua. Bolo tumhe kya chahiye? Koi sugandh chahiye?”
+
+“Kislie?” Mujhe unki baatein bachkani-si lagiin.
+
+“Chamatkarpoorn dhang se sugandh ka anand lene ke liye.”
+
+“Sugandh banane ke liye Bhagavan ka upyog?”
+
+“To usmein kya hai? Bhagavan vaise bhi sugandh to banate hi hain.”
+
+“Ji haan! Parantu ve har baar taza sugandh lene ke liye aur lene ke baad phenk dene ke liye phoolon ki komal pankhudiyon roopi sheeshiyon ka nirmaan karte hain. Kya aap phoolon ka nirmaan kar sakte hain?”
+
+“Haan! Parantu sadharantaya main sugandh hi nikalta hoon.”
+
+“Tab to itr ke karakhane band ho jayenge.”
+
+“Meri or se unhe apna dhandha karte rahne ki anumati hai! Mera apna uddeshya to keval Ishwar ki shakti dikhana hai.”
+
+“Maharaj! Kya Ishwar ki shakti ka praman dena aavashyak hai? Kya ve sakal vishva mein sarvatra apne chamatkar nahi kar rahe hain?”
+
+“Kar rahe hain, parantu unki anant srijnatmak vividhta mein se kuch to srijnatmakta hamein bhi prakat karni chahiye.”
+
+“Yeh siddhi prapt karne mein aapko kitna samay laga?”
+
+“Barah varsh.”
+
+“Daivi shakti se keval sugandh banane ke liye! He Mahatman! Mujhe to lagta hai aapne barah varsh vyarth ganwa diye un sugandhon ke liye jinhe aap kisi bhi phoolwale ki dukaan se kuch hi rupayon mein prapt kar sakte hain.”
+
+“Phoolon ki sugandh unke saath hi chali jati hai.”
+
+“Mrityu ke saath bhi sugandh chali jati hai. Main kisi aisi sugandh ki kamna kyon karoon jo keval shareer ko sukh deti hai?”
+
+“Darshanik Mahashay! Tumne mere man ko prasann kar diya. Ab apna dahina haath aage badhao.” Unhone aashirvad-mudra mein apna haath uthaya.
+
+Main Gandhbaba se kai gaz door tha; koi anya vyakti bhi mere itne nikat nahi tha ki mere shareer ka sparsh kar sake. Maine apna haath aage badhaya jise us yogi ne chhua tak nahi.
+
+“Kaun-si sugandh chahiye?”
+
+“Gulab.”
+
+“Tathastu.”
+
+Mere aashcharya ka thikana na raha jab meri hatheli ke madhya se gulab ki madhur sugandh teevrta ke saath nikalne lagi. Maine muskarate hue paas hi ki ek phooldani se ek gandhheen shwet pushp nikal liya.
+
+“Kya is gandhheen phool mein chameli ki sugandh bhari ja sakti hai?”
+
+“Tathastu.”
+
+Tatshan us phool se chameli ki sugandh uthi. Maine chamatkari sant ka dhanyavad kiya aur unke ek shishya ke paas jakar baith gaya. Us shishya ne mujhe bataya ki Gandhbaba ne, jinka naam Swami Vishuddhananda tha, Tibet ke ek yogi se anek aashcharyajanak siddhiyan prapt kar li thin. Usne mujhe yeh bhi bataya ki us Tibbati yogi ki aayu ek hazaar varsh se adhik thi.
+
+“Us mahan guru ke shishya Gandhbaba hamesha hi keval sadharan uchcharan se sugandh nirmaan nahi karte jaisa tumne abhi dekha.” Shishya ke bolne mein apne guru ke prati garv prakat tha. “Vyakti ke swabhav ke anusar ve bhinn-bhinn paddhatiyan apnate hain. Baba asamanya hain! Kolkata ke anek padhe-likhe log unke shishya hain.”
+
+Maine man hi man nishchay kiya ki main un shishyon ki sankhya mein apne ko jodkar us sankhya ki aur adhik vriddhi nahi karunga. Guru ka aksharshah “asamanya” hona mere man ke anukool nahi tha. Vinamrata se Gandhbaba ka abhivadan kar main wahan se nikal pada. Ghoomte-ghoomte ghar jate hue main us din ki teen vividhatapoor n ghatnaon ke vishay mein soch raha tha.
+
+Maine jaise hi ghar ke dwar se andar pravesh kiya, meri behan Uma saamne hi khadi thi.
+
+“Kya baat hai? Aajkal tum itr ke bade shaukeen bante ja rahe ho?”
+
+Bina kuch bole maine apna haath badhakar use soonghne ka ishara kiya.
+
+“Kitni mohak gulab ki sugandh! Aur yeh asaadharaan roop se teevr bhi hai!”
+
+Yeh sochte hue ki yeh “teevr roop se asaadharaan” hai, maine chupchap daivi roop se sugandhit kiya gaya phool uski naak ke neeche rakha.
+
+“Oh! Chameli mujhe bahut pasand hai!” Usne phool chheen liya. Jis phool ke vishay mein use achchhi tarah gyaat tha ki vah gandhheen hota hai, usi phool mein se chameli ki sugandh aate dekhkar, jaise-jaise vah use soonghti jati thi vaise-vaise uske chehre par vinodi lagnewale sambhram ke bhaav prakat hote jate the. Uski is pratikriya ne mere man se raha-saha sandeh bhi mita diya ki ho sakta hai Gandhbaba ne mujhpar aatma-sammohan ka prayog kiya ho jisse keval main hi sugandh ka anubhav kar sakoon.
+
+Baad mein mujhe apne ek mitra Alakananda se pata chala ki Gandhbaba ke paas aisi shakti bhi thi jo yadi sansar ke karodon kshudha-peedition ke paas hoti, to unki samasya hal ho jati.
+
+“Barahan mein Gandhbaba ke ghar mein us samay saikdon logon mein main bhi upasthit tha,” Alakananda ne mujhe bataya. “Ek utsav tha. Yogivar ki khyati thi ki ve shunya mein se kuch bhi utpann kar sakte hain, isliye maine haste hue unse santare utpann karne ka anurodh kiya. Vah santaron ka mausam nahi tha. Tatshan hi kele ke patton par jo pooriyaan parosi gayi thin, ve sab phool utheen. Har poori ki papdi ke bheetar ek-ek chhila hua santara aa gaya tha. Maine kuch sahme-sahme man se apna santara khana shuru kiya, parantu vah bada hi swadisht tha.”
+
+Kai varshon baad aatma-sakshatkar ke bal se main Gandhbaba ke chamatkaron ke rahasya ko jaan gaya. Khed is baat ka hai ki vah vidhi vishva ke kshudhart manav-jhundon ki pahunch se bahar hai.
+
+Manav ko shabd, sparsh, ras, roop, gandh ki jo vividh indriyanubhutiyan hoti hain, ve electrons aur protons ki spandanatmak vividhta ke karan hoti hain. Unke spandanon ko panchpran niyantrit karte hain. Ye panchpran anvik urjaon se bhi sookshmtar hote hain aur pragya-yukt paanch vishesh sanvedi tanmatraon se yukt hote hain.
+
+Gandhbaba kuch yaugik prakriyaon ke bal se is pranshakti ke saath samras hokar pran-kanikaon ki spandan-rachna mein parivartan lane mein aur is prakar ichchhit parinaam prapt karne mein samarth the. Unke gandh, phal aur anya chamatkar keval sammohan dwara utpann aantarik sanvedan nahi hote the, balki laukik spandanon ke vastav mein moort roop hote the.
+
+Sammohan-vidya ko doctoron dwara chhoti-chhoti shalyakriyaon mein un logon par prayukt kiya gaya hai jin ke liye behoshi ki davaein khatarnak ho sakti hain. Parantu jin par baar-baar sammohan ka prayog kiya jata hai unke liye yeh hanikarak hota hai. Iska hanikarak manovaigyanik parinaam kalantar mein mastishk ki koshikaon ki rachna mein gadbad utpann kar deta hai. Sammohan doosre ki chetna ke kshetra mein anadhikar pravesh hai.* Iske asthayi aabhasoin mein aur Ishwaranubhuti-sampann purushon dwara kiye gaye chamatkaron mein koi samanta nahi hai. Ishwar mein jagrit hue sachche sant nitya srijana karnewale us virat swapn-drashta ke saath apni ichchha ko milakar is swapn-srishti mein parivartan karte hain.*
+
+Gandhbaba jaise chamatkaron ka pradarshan karte the vaise chamatkar dikhane se log aakarshit to hote hain, parantu adhyatmik drishti se unka koi labh nahi hota. Manoranjan ke atirikt unka koi prayojan nahi hota, atah Ishwar ki yatharth khoj se ye sadhak ko pathchyut kar dete hain.
+
+Asaadharaan shaktiyon ke aadambarpoorn pradarshan ki siddhjanon ne ninda ki hai. Faras ke sant Abu Said ne jal, hawa aur antariksh par apni chamatkari shaktiyon ki satta ka abhiman karnevale kuch fakeeron ka upahas kiya tha.
+
+“Mendak bhi pani mein aaram se rah sakta hai!” Abu Said ne saumyata se upahas karte hue kaha tha. “Cheel kauve aasani se hawa mein ud sakte hain; Shaitan poorv mein bhi hai aur pashchim mein bhi. Sachcha manushya vah hai jo samaj mein sadachar ka palan karta hua rahta hai aur kray-vikray karte hue bhi kabhi ek kshan ke liye bhi Ishwar ko nahi bhulata!”†
+
+* Srishti apne kan-kan mein pratinidhitva hai. Ek toop tattva se hi sab bana hai. Oos bindu mein srishti golakar ban jati hai ... Sarvavyapakata ka sachcha arth yeh hai ki shaival ke pratyek ankur mein aur makdi ke pratyek jaal mein bhi Ishwar apni sampoor nata ke saath vidyaman hai.” — Emerson “Compensation” mein.
+
+† “Kray-vikray karte hue bhi kabhi ek kshan ke liye bhi Ishwar ko nahi bhulana!” Is aadarsh ke peeche bhaav yeh hai ki vyakti jo bhi karya kar raha ho usmein uska man laga hona chahiye. Kuch pashchatya lekhak kehte hain ki Hindu jeevan-darshan sahasheen palayan ka, akarmanyata evam samajghati nivritti ka marg hai. Vastav mein manav jeevan ke liye Vedon ki chaturvargashram vyavastha hi lok samaj ke liye santulit vyavastha hai jismein manushya ka aadha jeevan adhyayan aur grihasth dharm ke palan ke liye tatha shesh aadha jeevan chintan evam dhyanabhyas ke liye nirdharit hai.
+
+Parmatma mein sthir hone ke liye ekaantavas aavashyak hai, parantu jinhone yeh sthirta prapt kar li hai ve taduparant jagat ki seva karne ke liye vapas laut aate hain. Jo santjan bahya star par koi karya nahi karte, ve bhi apne vicharon evam pavitra spandanon dwara jagat ka aatmagyaanheen manushyon dwara athak kiye gaye lokopkari karyon se kahin adhik badhkar hit karte hain. Mahatmajan apne-apne dhang se aur prayah kadve virodh ko jhelkar, apne samakaleen logon ko prerit karne tatha unnat karne ka nihsv arth prayas karte rahte hain. Hinduon ka koi bhi aadarsh, chahe vah dharmik ho ya samajik, keval nakaratmak nahi hai. Yahan tak ki ahinsa bhi, jise Mahabharat mein sakal dharm ya poorn dharm kaha gaya hai, keval nakaratmak agya nahi balki usmein nihit is dharana ke karan ek sakaratmak agya hai ki jo doosron ko sahayata nahi karta vah kisi na kisi roop mein unka anisht (hinsa) karta hai.
+
+Srimad Bhagavad Gita (Adhyay 3, 4-8) yeh spasht karti hai ki karma karna manav ko prakriti mein nihit hai. Aalasya bhi aur kuch na hokar keval “anisht karma” hai.
+
+Na karmanam anarambhan naishkarmyam purusho’shnute |  
+Na cha sannyasanad eva siddhim samadhigacchati || 4 ||
+
+Manushya na to karmon ka aarambh kiye bina nishkarmata ko prapt hota hai aur na hi karmon ke keval tyagmatra se siddhi ko prapt hota hai.
+
+Na hi kashchit kshanam api jatu tishthaty akarmakrit |  
+Karyate hy avashah karma sarvah prakritijair gunaih || 5 ||
+
+Nihsandeh koi bhi manushya kisi bhi kaal mein kshanmatra bhi bina karma kiye nahi rahta; kyon ki sara manushya-samuday prakritijanit gunon ke adheen hua karma karne ke liye badhya kiya jata hai.
+
+Karmendriyani samyamya ya aste manasa smaran |  
+Indriyarthan vimoodhatma mithyacharah sa uchyate || 6 ||
+
+Jo moodhbuddhi manushya samast indriyon ko hath-purvak upar se rokkar man se un indriyon ke vishayon ka chintan karta rahta hai, vah mithyachari arthat dambhi kaha jata hai.
+
+Yas tv indriyani manasa niyamyarabhate’rjuna |  
+Karmendriyaih karmayogam asaktah sa vishishyate || 7 ||
+
+Kintu he Arjun! Jo purush man se indriyon ko vash mein karke anasakt hua samast indriyon dwara karmayog ka aacharan karta hai, vahi shreshth hai.
+
+Niyatam kuru karma tvam karma jyayo hy akarmanah |  
+Shareerayatrapi cha te na prasiddhyed akarmanah || 8 ||
+
+Tum shastravihit karma karo; kyunki karma na karne ki apeksha karma karna shreshth hai tatha karma na karne se to tumhara shareer-nirvah bhi siddh nahi hoga.
+
+Ek anya avsar par is mahan Farasi sant ne dharmik jeevan ke vishay mein apna mat is prakar vyakt kiya tha: “Apne dimaag mein jo kuch hai use nikal dena (swadheenishth ichchha-akankshaen); haath mein jo kuch hai us ka mukt roop se daan karna; aapattiyon ke aaghat se kabhi bhi vichalit nahi hona!”
+
+Na to Kalighat ke nisprih mahatma aur na Tibet se prashikshit yogi hi meri guruprapti ki teevr ichchha ko santusht kar sake. Kisi ka adhyatmik star pehchanne mein mere hridaya ko shikshit karne ki aavashyakta nahi thi. Jab bhi kisi sachmuch udatt vyaktitva ka samna hota tab vah dhanya-dhanya kar uthta, yeh dhanya-dhanya aur bhi goonjnevali hoti kyunki yeh kabhi-kabhar hi aur vah bhi antartam gehrai yon se uth ti. Antatah jab apne guru se mera sakshatkar hua, tab unhone keval udaharan ki atyuchchata ke dwara hi mujhe sachche purush ka pariman sikhaya.
+
+`},
+{ title: "Bagh Swami", text: `
+
+“Maine Bagh Swami ka pata khoj nikala hai. Chalo, kal unka darshan kiya jaaye.”
+
+Yeh swagataarh prastaav high school ke mere ek mitra Chandi se mila. Apne sanyas-poorv jeevan mein keval apne nange haathon se baghon ke saath ladne aur unhe pakadne wale is sant ka darshan karne ke liye main bhi utsuk tha. Aise asaadharaan sahasik kaaryon ke prati baal-sulabh utsaah mujh mein bharpoor tha.
+
+Doosre din pratahkaal bahut thand pad rahi thi, par main Chandi ke saath atyant utsaah aur sphoorti ke saath chal pada. Kolkata ke baahar Bhawanipur mein bahut der tak vyarth khoj karne ke baad hum theek ghar par pahunch gaye. Darwaze par lohe ki do golakaar kadiyan lagi hui thin. Maine unhe bahut zor-zor se khatkhataaya. Us karnakash khadkhadaahat ko sunkar bhi ek naukar andar se dheere-dheere aaraam-poorvak chalta hua hamari ore aaya. Uski vyangyaatmak muskaan is baat ka dyotak thi ki shor machane wale aagantuk bhi ek sant ke ghar ki shaanti bhang nahi kar sakte.
+
+Uski maun bhartsana ko humne anubhav kiya, par baithak mein aane ke liye aamantrit kiye jaane par Chandi aur main uske prati kritagya the. Wahan lambi prateeksha hum logon ke man mein shanka-kushankaayein utpann karne lagi. Satya ki khoj karne wale ke liye Bharat ka alikhit niyam hai dhairy; sant-mahatma kabhi-kabhi jaan-boojhkar darshanarthi ki utsukta ki pareeksha le sakte hain. Paashchaatya doctor aur dant-chikitsak is manovaigyanik kootneeti ka bharpoor prayog karte hain.
+
+Antatah naukar dwara bulaye jaane par Chandi aur main ek shayan-kaksh mein gaye. Wahan suvikhyaat So’ham Swami* apne palang par baithe hue the. Unke bheemkaay shareer ko dekhkar hum donon ke man par adbhut prabhaav pada. Aankhein phaade hum avaak unki ore dekhte rahe. Vaisi vishaal chhaati aur football ki tarah baazuhein humne pehle kabhi nahi dekhi thin. Atyant mazboot, bhari gardan par Swamiji ka ugra dikhne wala parantu shaant mukhamandal, moonchh, daadhi aur jhoolte keshon se sushobhit tha. Unki kaali aankhon mein kabootar evam baagh-samaan gunon ka milajula sanket chamak raha tha. Dridh maansal katipradesha ko gher kar pahne hue ek vyaaghracharm ke atirikt unke shareer par aur koi kapda nahi tha.
+
+Jab hamari vaak-shakti laut aayi tab baghon ke saath ladne mein unki veerta ke prati aadar-yukt vismay prakat karte hue maine unka abhivadan kiya.
+
+“Kya aap kripa karke hamein yeh nahi batayenge ki vanya pashuon mein sabse bhayankar Royal Bengal Tiger ko keval apne haathon se paraast karna kaise sambhav hai?”
+
+“Mere bachchon! Baghon ke saath ladna mere liye kuchh bhi nahi hai. Aavashyakta padne par main aaj bhi woh kar sakta hoon.” Ve bachchon ke samaan khilkhilaakar hanse. “Tum baghon ko baagh maante ho; main unhein maatr billiyan samajhta hoon.”
+
+“Swamiji! Main apne man ko to vishwas dila sakunga ki baagh billiyan maatr hain, parantu kya baghon ko main vaisa vishwas kara sakunga?”
+
+“Nishchay hi shakti bhi aavashyak hai! Keval koi bachcha baagh ko gharelu billi maan lega to use baagh par vijay mil jaayegi yeh maanna vyarth hai. Mere shaktishaali haath shastra ke roop mein paryaapt hain.”
+
+Unhone hamein apne saath aangan mein aane ko kaha jahaan ek deewar ke kinare par unhone prahaar kiya. Deewar ki ek eent toot kar zameen par gir padi. Toote hue daant ki tarah bani khaali jagah se aakaash dhrishtata-poorvak jhaankne laga. Main hakka-bakka rah gaya; sochne laga, jo aadmi ek hi prahaar se deewar mein chuni hui eent ko gira sakta hai, woh avashya hi baghon ke daant bhi tod sakta hai.
+
+“Anek logon mein mere samaan shareerik shakti hoti hai, parantu phir bhi unmein dridh aatma-vishwas ka abhaav hota hai. Jo shareer se to balishth hote hain parantu man se nahi, ve jungle mein swachchhand vicharan karte hinsra pashu ko dekhkar hi moorchchhit ho sakte hain. Prakritik paristhitiyon mein vaas karne wala aur apne mool hinsak swabhaav ke anusaar jeene wala baagh circus ke afim khilaye gaye baagh se atyant bhinna hota hai!
+
+“Bheem ke samaan prabal shaktishaali hote hue bhi anek vyakti Royal Bengal Tiger ke prachand aakraman ke saamne atyant bhaybheet aur asahaay ho uthte hain. Is prakaar baagh manushya ko uske hi man ki kalpana mein ek saadhaaran billi ki bhaybheet avastha ke samaan sthiti mein daal deta hai. Parantu jis manushya mein yathaavat balishth shareer ke saath-saath atyant dridh nishchay ho, woh is paristhiti ko baagh par hi ulat sakta hai aur use yeh maanne par vibash kar sakta hai ki woh ek billi ke samaan hi aatma-raksha mein asamarth hai. Kitni hi baar maine yahi kiya hai!”
+
+Main yeh maanne ke liye poornta taiyaar tha ki mere samaksh upasthit atishaktishaali purush baagh ko billi mein roopantarit karne mein samarth the. Ve kuchh upadesh dene ki manahsthiti mein prateet hue; Chandi aur main aadar ke saath unki baatein sunne lage.
+
+“Man hi maanspeshiyon ko niyantrit karta hai. Jaise hathaude ke aaghaat ki shakti us par lagaaye gaye bal par nirbhar hoti hai, vaise hi manushya ki shareerik shakti ki abhivyakti uski aakraamak ichchha-shakti ki teevrata evam saahas par nirbhar karti hai. Man hi aksharashah shareer ka nirman karta hai aur wahi use jeevit rakhta hai. Gat-janmon ki pravrittiyon ki prabalta ke anusaar achchhe ya bure swabhaav-gun dheere-dheere maanav-chetna mein utarte hain. Ye swabhaav-gun aadaton mein dhal jaate hain aur ye aadatein phir ek vaanchhaneey ya avaanchhaneey shareer ke roop mein pradarshit hoti hain. Baahya durbalta ki jad man mein hoti hai aur aadat se laachaar shareer man ki avhelna karta hai; is prakaar yeh kuchakra chalta jaata hai. Yadi maalik naukar ki aagya ka paalan karne lage to naukar nirankush swechchhaachaari ban jaata hai; isi prakaar man bhi shareer ki aagyaon ka paalan kar-kar ke uska daas ban jaata hai.”
+
+Hamare anunay par yeh tejaswi Swami apne jeevan ke baare mein hamein kuchh bataane ke liye sahmat ho gaye.
+
+“Bachpan se hi baghon se ladne ki mahatvaakaanksha mere man mein thi. Meri ichchha shaktishaali thi parantu deh durbal thi.”
+
+Mere munh se aashcharyodgaar phoot pada. Yeh avishwaseeya lagta tha ki “prithvi ka bhaar uthane ke yogy kandhon” wale is manushya ka durbalta ke saath door-door se bhi kabhi koi parichay raha ho.
+
+“Swasthya aur shakti ke chintan mein adamya dridhata dwara hi maine is baadha ko door karne mein safalta praapt ki. Is prabhaavshaali maanasik shakti ki prashansa karne ka kaaran aur bhi badh jaata hai kyunki maine dekha hai ki Royal Bengal Tigers ko paraajit karne wali vastutah yahi shakti thi.”
+
+“Swamiji! Kya aapko lagta hai ki main bhi kabhi baghon ke saath lad paunga?” Yeh pehla aur antim avsar tha jab yeh vichitra mahatvaakaanksha mere man mein uthi!
+
+“Haan.” Ve muskara rahe the. “Parantu baagh anek prakaar ke hote hain; kuchh manushya ki ichchha-vaasnaon ke jungle mein ghoomte hain. Pashuon ko apne prahaar se behosh kar dene se koi aadhyaatmik laabh nahi hota. Usse achchha yeh hai ki apne antar mein ghoomte un baghon ko paraajit kiya jaaye.”
+
+“Swamiji! Kya aap hamein batayenge ki aap hinsra baghon ko vash mein karte-karte hinsra vaasnaon ko vash mein kaise karne lag gaye?”
+
+Bagh Swami maun ho gaye. Ateet ke drishyon ko nihaarne ka prayaas karti unki drishti sudoor kahin lag gayi. Maine bhaamp liya ki unke man mein mere anurodh ko sweekaar karen ya na karen is par thodi uthal-puthal chal rahi thi. Ant mein man hi man sweekaar karke ve muskara uthe.
+
+“Jab meri keerti charam-bindu par pahunch gayi tab mujhe garv ka nasha chadh gaya. Maine tay kiya ki main na keval baghon se ladunga balki logon ke saamne unse vividh kartab bhi karaunga. Meri mahatvaakaanksha hi yeh ban gayi ki main hinsra pashuon ko paaltoo jaanwaron ki tarah bartav karne par vibash kar doonga. Main saarvajanik roop se apne kartab dikhaane laga aur usmein milne wali safalta se mujhe khushi bhi hone lagi.
+
+“Ek din shaam ko mere pitaji atyant chintatur manahsthiti mein mere kamre mein aaye.
+
+“‘Beta! Main tumhein saavadhaan karne aaya hoon. Karm ki chalti chakki se utpann hokar aane wale amangalon se main tumhein bachana chahta hoon.’
+
+“‘Kya aap bhaagyavaadi hain pitaji? Andhvishwas se kya meri gatividhiyon ke shaktishaali pravaah ko avaruddh hone dena chahiye?’
+
+“‘Main bhaagyavaadi nahi hoon, beta! Parantu pavitra shaastron mein kahe gaye pratiphal ke niyam mein mera vishwas hai. Jungle parivaar mein tumhare viruddha aakrosh vyaapt hai; yeh aakrosh kabhi bhi tumhari jaan ke liye khatra bankar saamne aa sakta hai.’
+
+“‘Pitaji! Aap mujhe aashcharya mein daalte hain! Baagh kya hote hain aap achchhi tarah jaante hain — sundar parantu nirdayi! Kaun jaane, mere prahaar unke thos-buddhi mein shayad kuchh udaarta ke vichaar bhar saken? Unhein sabhya shishtachaar sikhaane ke liye hi main jungle-vidyaalay ka pradhanaadhyaapak bana hoon!
+
+“‘Pitaji! Kripaye aap mujhe baghon ko paalne wala baagh-paalak maanein, baagh-hatyaara nahi. Mere ye satkarm mera anisht kaise kar sakte hain? Main aapse praarthna karta hoon ki aap mujhe apne jeevan ka maarg badalne ki aagya na dein.’”
+
+Chandi aur main dhyaan-poorvak sun rahe the aur ateet ke is dharm-sankat ko samajh rahe the. Bharat mein koi santaan apne mata-pita ki ichchhaon ka anaadar nahi karti. Bagh Swami aage kahte gaye:
+
+“Nirvikaar maun mein pitaji ne mera spashtikaran suna. Taduparaant unhone gambheerata-poorvak ek rahasyodghaatan kiya.
+
+“‘Beta! Tum mujhe ek sant ki amangal-soochak bhavishyavaani dohraane par vibash kar rahe ho. Kal jab main baraamde mein baithkar nitya ki bhaanti apna dhyaan kar raha tha tab ve mere paas aaye.
+
+“‘Mitra-var! Main aapke yuddha-priya bete ke liye ek sandesh lekar aaya hoon. Usse kahiye ki woh apni barbar gatividhiyaan band kar de. Anyatha baagh ke saath uski agli ladai mein use anek dusadhya ghaav honge jisse chhah mahinon tak woh maranasann avastha mein pada rahega. Tab woh apna purana maarg chhodkar sanyaasi ban jaayega.’
+
+“Is kahaani ka mujh par koi prabhaav nahi pada. Maine yahi maana ki pitaji kisi bhraanti-grasit katharvaadi ki bhraanti ka shikaar ho gaye hain.”
+
+Yeh kahte hue Bagh Swami ke haav-bhaav itne adheer aur aise the maanon apni moorkhta par unhein krodh aa raha ho. Kaafi der tak ve gambheer mudra mein maun baithe rahe jaise wahan hamari upasthiti ka unhein koi bhaan na ho. Phir unhone akasmaat hi apni kahaani aage shuru ki, is baar unki aawaaz mein narmi aa gayi thi.
+
+“Pitaji ki chetaavani ke kuchh hi din baad main raajdhaani Cooch Behar gaya. Prakritik saundarya se bhara yeh pradesh mere liye naya tha aur main sukh-prad parivartan ki aasha kar raha tha. Jaisa har jagah sada hi hota tha, yahaan bhi sadkon par mere peechhe-peechhe utsuk logon ki bheed chalti rahti thi. Unki phusphusaahat ke kuchh ansh kabhi-kabhi mujhe sunaayi padte the:
+
+“‘Yeh wohi aadmi hai jo jangli baghon ke saath ladta hai.’
+
+“‘Uske ve pair hain ya ped ke tane?’
+
+“‘Uska chehra to dekho! Woh swayam baghon ke raja ka avataar maaloom hota hai!’
+
+“Tum to jaante hi ho gaavon ke natkhat chhokare kis prakaar taaza samaachaar-patra ka kaam karte hain! Aur kis gati se mahilaon ki maukhik jan-soochna pranaali is ghar se us ghar samaachaar pahunchaati hai! Kuchh hi ghanton mein meri wahaan upasthiti se saare shahar mein khal-bali mach gayi.
+
+“Sandhya ke samay main chupchaap aaraam kar raha tha ki ghodon ki taapon ki dhvani sunaayi di. Main jis ghar mein ruka tha usi ke saamne aakar woh dhvani ruk gayi. Lambe kad ke pagdi-dhaari police sipaahiyon ka ek dal andar ghus aaya.
+
+“Main avaak rah gaya. Maine socha, ‘In police-waalon ke liye kuchh bhi sambhav hai. Kahin ve mere liye poorntaya agamya kisi baat par meri khinchaai karte to nahi aaye hain?’ Parantu unhone apne saamaanya vyavhaar ke vipareet atyant vinay ke saath mera abhivadan kiya.
+
+“‘Aadaraneey mahoday! Cooch Behar ke Yuvaraj ki ore se aapka swaagat karne ke liye hamein bheja gaya hai! Unhone kal pratahkaal aapko apne raaj-praasaad mein padhaarene ka aamantran bheja hai.’
+
+“Main thodi der is par sochta raha. Kisi agyaat kaaran se apni is shaant yaatra mein upasthit hue is vighn se teevra udveg ki bhaavna mere man mein uth rahi thi. Parantu police-waalon ki vinay-sheelta ne mere hriday ko chhoo liya; maine nimantran sweekaar kiya.
+
+“Doosre din jis daasochit vinamrata aur khushaamad ke saath mujhe apne dwaar se chaar ghode jute hue shaahi coach tak le jaaya gaya use dekhkar main chakit rah gaya. Ek sevak teevr dhoop se mujhe bachane ke liye ek alankrit chhaata mere oopar pakde khada raha. Nagar aur uske baahar ke van-kshetra mein se sukhad coach savaari karte hue mujhe bada maza aa raha tha. Yuvaraj swayam mera swaagat karne ke liye raaj-praasaad ke singh-dwaar par upasthit the. Apne swarn-khachit aasan par unhone mujhe baithaya aur muskaraate hue swayam usse kam saaj-sajjaayukt ek aasan par baith gaye.
+
+“‘Yeh sab vinamra seva nishchay hi mujhpar koi museebat laane wali hai!’ Badhte hue aashcharya ke saath main soch raha tha. Idhar-udhar ki thodi baatein karne ke baad Yuvaraj ka uddeshya prakat ho hi gaya.
+
+“‘Mere nagar mein afwaah faili hui hai ki aap keval apne nange haathon se jangli baghon ke saath lad sakte hain. Kya yeh sach hai?’
+
+“‘Bilkul sach hai.’
+
+“‘Hamein is par vishwas nahi hota! Aap shahri logon ke polish kiye hue chaaval par pale Kolkata ke Bangali hain. Kripaye sach-sach bataiye, kya aap keval nirbal, afim khilaye gaye baghon se hi nahi ladte rahe hain?’ Unka swar ooncha aur vyangya-bhara tha. Unke bolne ke dhang mein unke prant ki shaili ki jhalak thi.
+
+“Unke us apmaanjanak prashn ka uttar dena maine aavashyak nahi samjha.
+
+“‘Hum haal hi mein pakde gaye apne baagh Raja Begum* ke saath ladne ki aapko chunauti dete hain. Yadi aap uska safalta-poorvak saamna kar saken aur use zanjeer se baandhkar chetan avastha mein uske pinjre se baahar nikal saken, to woh Royal Bengal Tiger aapka ho jaayega. Iske atirikt sahasraavadhi rupaye evam anya kai uphaar bhi aapko milenge. Aur yadi aapne usse ladna asweekaar kar diya to hum apne poore raajya mein aapko paakhandi ghoshit kar denge!’
+
+“Unke uddhat shabd goliyon ki bauchhaar ke samaan mujhe lag gaye. Maine gusse se unki sharten sweekaar kar leen. Uttejana mein aasan se aadhe uth khade hue Yuvaraj nishthur muskaan ke saath waapas baith gaye. Unki woh muskaan dekhkar mujhe un Roman samraaton ki yaad aayi jinhein Isaiyon ko hinsra pashuon ke saath ladaane mein aanand aata tha. Yuvaraj ne aage kaha:
+
+“‘Aapki ladai aaj se ek saptaah baad hogi. Hamein khed hai ki hum ladai se pehle baagh ko dekhne ki anumati aapko nahi de sakte.’
+
+“Yuvaraj ko kahin yeh bhay to nahi tha ki main baagh par sammohan-vidya ka prayog karunga ya use afim khilaane ka prayaas karunga, main nahi jaanta.
+
+“Main raaj-praasaad se chal pada. Maze ki baat yeh thi ki ab ki baar na to raaj-chhatr tha aur na hi woh saaj-sajjaayukt coach!
+
+Agle saptaah bhar mein main aagaami agni-pareeksha ke liye apne man aur shareer, donon ko vidhiwat taiyaar karta raha. Apne naukar dwara mujhe vilakshan kahaaniyaan sunne ko mil rahi thin. Pitaji ke paas sant ne jo bheeshan bhavishyavaani ki thi woh kisi prakaar logon mein fail gayi aur failte-failte badhti gayi. Anek bhole-bhaale graameenon ka vishwas tha ki ek dusht aatma ne devtaon ke shaap ke kaaran baagh ka janm liya tha jo raat ko vibhinn aasuri roop dhaaran karti hai, parantu din mein phir se baagh bankar rahti hai. Logon ka anuman tha ki yeh wohi aasuri baagh hai jise mera garv hanan karne ke liye bheja gaya hai.
+
+“Ek anya kalpana yeh thi ki baghon ki apne devta se ki gayi praarthnaon ka uttar Raja Begum ke roop mein aa gaya hai. Samagra vyaaghra-jaati ke liye itna maan-haanikaarak uhare is dhrisht dopaye ko — mujhe — dandit karne ke liye use niyat kiya gaya hai. Ek lom-dant-viheen manushya nakh-dant-yukt, shaktishaali paad-yukt baagh ko chunauti dene ka dussahas kare! Log yeh bhi kah rahe the ki sabhi avmaanit baghon ke dvesh ne milkar itna zor pakad liya hai ki baghon ka maan-mardan karne wale is abhimaani purush ka patan karaane ke liye woh zor ab sookshm niyamon ko kaaryaanvit kar raha hai.
+
+“Mere naukar ne mujhe aage bataya ki Yuvaraj swayam maanav aur pashu ke beech hone wale is dwandwa ke vyavasthaapan ka kaaryabhaar sambhaal rahe the. Unhone swayam apni dekh-rekh mein hazaaron logon ke baithne yogy ek aise vishaal tambu ka nirman karaaya jo aandhi-toofan mein bhi surakshit khada rah sake. Us tambu ke madhya mein lohe ke ek vishaal pinjre mein Raja Begum ko rakha gaya tha. Is pinjre ke baahar suraksha ka ek aur ghera tha. Raja Begum nirantar khoon jama dene wali bhayankar garjanaein karta ja raha tha. Uski kshudhaagni aur krodhaagni donon ko bhadkaane ke liye use bahut kam khaana diya ja raha tha. Shayad Yuvaraj ko aasha thi ki main uska puraskaar-swaroop bhojan banunga!
+
+“Danka baja-bajakar nagar aur aas-paas ke ilaake mein is adwiteeya dwandwa ki jo ghoshana ki ja rahi thi, use sunkar logon ne bhaari sankhya mein utsukta-poorvak ticketein kharideen. Dwandwa ke din seaton ki kami ke kaaran sainkdon logon ko lauta diya gaya. Kai log tambu ki daraaron mein se andar ghus aaye, ya gallery ke neeche jahaan bhi jagah mili wahin khade ho gaye.”
+
+Jaise-jaise Bagh Swami ki katha charam-seema ki ore badh rahi thi, vaise-vaise meri uttejana bhi badhti gayi; Chandi bhi mantra-mugdh hokar avaak baitha tha.
+
+“Raja Begum ki kaan phaad dene wali garjanaon ke aur bhaybheet darshakon ke kolaahal ke beech maine shaant man se tambu mein pravesh kiya. Langot ke atirikt mere shareer par aur koi kapda nahi tha. Maine surakshaatmak ghere ke darwaze ka kunda sarkaakar use khola aur andar jaakar apne peechhe shaant man se darwaze ko band kar liya. Baagh ko rakt ki gandh lag gayi. Uchhal-kar dhadam se lohe ki chhadon se takraane ki dhvani ke saath usne mera bheeshan swaagat kiya. Karunaardra bhay se darshakon mein sannaata chha gaya; us ati ugra baagh ke saamne main nireeh memna lag raha tha.
+
+“Palak jhapakte hi main uske pinjre mein ghus gaya; parantu jaise hi maine darwaza band kiya, Raja Begum uchhal-kar seedha mere oopar aa gaya. Mera daahina haath buri tarah kshat-vikshat ho gaya. Baagh ke liye param swaadisht maanav-rakt ki prachand dhaaraein girne lagiin. Sant ki bhavishyavaani satya hone ke aasaar nazar aane lage.
+
+“Is prakaar ki gambheer chot mujhe jeevan mein pehli baar aayi thi, par main turant us se sambhal gaya. Rakt-ranjit ungliyon ko langot mein ghusaakar maine unhein chhipa liya aur baayein haath se ek haddi-tod prahaar baagh par kiya. Baagh ladkhadaakar peechhe hat gaya, pinjre ke ant tak peechhe gaya, phir palat-kar atyant gusse ke saath punah mujh par jhapta. Mere suvikhyaat mushti-shaasan ke prahaar uske sir par barasne lage.
+
+“Parantu Raja Begum ko rakt ka jo swaad lag gaya tha, usne deerghkaal tak sharaab se vanchit rahne wale sharaabi ki jaise sharaab ka pehla ghoont unmatt kar deta hai, usi prakaar unmatt kar diya tha. Beech-beech mein kaan baitha dene wali dahaadein maarte hue uske aakramanon ki ugrata badhti hi ja rahi thi. Uske daanton aur nakhon ke aage mera keval ek haath se bachaav karna aparyaapt pad raha tha aur meri aatma-raksha-pranaali abhedya nahi rah paa rahi thi. Parantu main bhi tilmilaane wale prahaar us par karta gaya. Donon hi rakt-ranjit hokar jeevan-maran ka yuddha lad rahe the. Pinjre mein kolaahal tha, chaaron dishaon mein rakt ke chheente ud rahe the, baagh ke gale se peeda aur khooni praan-pipaasa ke cheetkaar phoot rahe the.
+
+“‘Goli chalao! Baagh ko maar daalo!’ darshak cheekh rahe the. Maanav aur pashu itni tez gati se hil rahe the ki ek sipaahi ki goli bhi nishaana chook gayi. Maine apni saari sankalp-shakti ekatra ki aur bheeshan garjan ke saath uske mastak par ek antim khopdi-tod prahaar kiya. Baagh gir gaya aur thanda hokar pada raha.”
+
+“Paaltoo billi ki bhaanti!” main beech mein hi bol pada.
+
+Swamiji khilkhilaakar hans pade, phir unhone tanmay kar dene wali apni kahaani ko aage bataana shuru kiya.
+
+“Aakhir Raja Begum paraajit ho hi gaya. Uska raha-saha raaj-garv bhi choor-choor ho gaya: apne videern, rakt-ranjit haathon se maine uska jabda khola aur ek natya-poorn kshan ke liye us khule mrityu-dwaar mein apna sir rakha. Zanjeer ke liye idhar-udhar dekha aur zameen par pade zanjeeron ke dher mein se ek zanjeer kheenchkar usse baagh ki gardan pinjre ki chhadon ke saath baandh di. Vijayollass mein main darwaze ki ore chalne laga.
+
+“Parantu woh moortimaan shaitaan Raja Begum! Uski kalpit aasuri utpatti ke anuroop hi woh jeevat tha! Ek hi vismaykaari jhatke ke saath zanjeer todkar woh meri peeth par jhapat pada. Mera kandha uske jabde mein phansa hua tha aur aisi sthiti mein main zor se neeche gira. Parantu palak jhapakte hi maine use apne neeche dhar dabocha. Nishthur prahaaron ke aaghaaton se woh ardh-moorchchhit ho gaya. Is baar maine use adhik saavadhaani-poorvak baandh diya. Dheere-dheere main pinjre se baahar nikla.
+
+“Phir se chaaron taraf cheekh-pukaar sunaayi di, is baar woh harshollass ki thi. Bheed ki cheekh-pukaar ki harsh-dhvani jaise ek hi viraat gale se nikal rahi thi. Main bheeshan roop se ghayaal to ho gaya tha parantu phir bhi maine dwandwa ki teenon sharten poori kar di thin — baagh ko achet karna, use zanjeer se baandhna aur bina kisi prakaar ki sahaayata liye pinjre se baahar aana. Iske alaawa maine us hinsra pashu ko is tarah ghayaal aur bhaybheet kar diya tha ki mere sir ka apratim puraskaar apne mukh mein paakar bhi uski ore usne koi dhyaan nahi diya!
+
+“Mere ghaavon ka praathamik upchaar karne ke baad mera samman kiya gaya aur mujhe pushp-haar pahnaaye gaye. Mere charanon mein swarn muharon ki varsha ki gayi. Asaadharaan roop se vishaal aur vaise hi kroor baagh par meri vijay ki antaheen charchaain chaaron ore se sunaayi de rahi thin. Vachan ke anusaar Raja Begum mujhe de diya gaya, parantu mujhe koi harsh nahi hua. Mere hriday mein aadhyaatmik parivartan aa gaya tha. Aisa prateet ho raha tha ki pinjre se baahar nikalne ke saath hi maine sansaar mein apni mahatvaakaankshaon ka dwaar bhi band kar diya tha.
+
+“Uske baad ka kuchh samay atyant vedana aur manastaap mein beeta. Rakt mein vish failne ke kaaran chhah mahinon tak main maranasann avastha mein pada raha. Cooch Behar chhodne yogy theek hote hi main apne gaanv laut aaya.
+
+“‘Ab main jaan gaya hoon ki jin saadhu ne saavadhaani ka vivek-poorn ishaara diya tha wahi mere guru hain,’ ek din vinamrata-poorvak maine pitaji se kaha. ‘Kaash! Main kisi prakaar unhein dhoondh paata!’ Meri laalsa sachchi thi, kyunki ek din wahi sant bina kisi soochna ke hamare ghar padhaare.
+
+“‘Baghon ka daman bahut ho gaya.’ Shaant adhikaar-poorn vaani mein ve bol rahe the. ‘Mere saath aao; main tumhein maanav-man ke junglon mein vicharne wale agyaan ke pashuon ka daman karna sikhaunga. Tumhein darshakon ki aadat ho gayi hai; ab yogaabhyaas mein tumhari romanchak paangati se jhoom uthne wale devta tumhare darshak honge!’
+
+“Mere guru ne mujhe aadhyaatmik maarg ki deeksha di. Meri aatma ke deerghkaal tak aprayukt rahne se morcha lage, kholne mein kathin dwaar unhone khol diye. Sheeghra hi ek doosre ka haath thaame, meri saadhana ke liye hum donon Himalaya ki ore chal pade.”
+
+Apne toofaani jeevan ki ek jhalak hamein dikhaane ke liye kritagya hokar Chandi aur maine Swamiji ke charanon mein pranaam kiya. Mujhe aur mere mitra ko laga ki baithak mein upeksha mein ki gayi lambi prateeksha ka hamein bharpoor pratiphal mila!
+
+---
+
+* So’ham Swami unka sanyas naam tha. Log unhein Bagh Swami hi kahte the.  
+* Raja Begum: us baagh mein baagh aur baaghin, donon ki hinsrata maujood hone ke kaaran use yeh naam diya gaya tha.
+`},
+{ title: "Plavan-sheel Sant", text: `
+“Kal raat ek sabha mein maine ek yogi ko zameen se kai foot oopar hawa mein thahre hue dekha.” Mera mitra Upendra Mohan Chaudhary bade hi prabhaavshaali dhang se bol raha tha.
+
+Maine utsaah-poorn muskaan ke saath kaha: “Shayad main unka naam bata sakta hoon. Kahin ve Upper Circular Road ke Bhaduri Mahashay to nahi the?”
+
+Upendra ne sweekriti mein sir hilaya. Yeh baat mujhe pehle hi gyaat hai yeh dekhkar uska chehra thoda utar gaya. Santon ke baare mein meri jigyaasa se mere sabhi mitra bhali-bhaanti parichit the; koi nayi jaankaari milte hi mujhe unke peechhe laga dene mein unhein bada aanand aata tha.
+
+“Ye yogi Maharaj mere ghar ke itne nikat rahte hain ki main praayah unse milne jaata hoon.” Mere is kathan se Upendra ke chehre par utsukta ke bhaav umadte dekh maine use aur bhi baatein bataana shuru kiya.
+
+“Unke kai kamaal maine dekhe hain. Patanjali* praneet praacheen ashtaang yog ke vibhinn pranayama† vidhiyon mein ve nishnaat hain. Ek baar Bhaduri Mahashay ne mere saamne bhastrika pranayama itne zor se kiya ki lagta tha maano us kamre mein sachmuch ka toofan aa gaya ho! Phir unhone garjan karte shwasochchhwas ko band kar diya aur ve atichetnata** (samadhi) ki ek uchch avastha mein nishchal baithe rahe. Toofan ke baad shaanti ka vaataavaran itna prabhaavpoorn tha ki use kabhi bhulaya nahi ja sakta.”
+
+“Maine suna hai ki ve kabhi ghar se baahar nahi nikalte.” Upendra ke swar mein kuchh avishwaseeyata jhalak rahi thi.
+
+“Vastav mein yeh sach hai! Vigat bees varshon se ve ghar ke bheetar hi rahte aaye hain. Keval hamare parv-tyohaaron ke avsar par ve swayam hi lagaaye is niyam ko thoda dheela karte hain jab ve apne hi ahaate mein sthit saamne ki pagdandi tak jaate hain! Wahaan par bhikhaari jama ho jaate hain kyunki sant Bhaduri apne dayaardra hriday ke liye prasiddh hain.”
+
+“Gurutvaakarshan ke niyam ko thukraakar ve hawa mein kaise rah paate hain?”
+
+“Kuchh pranayamon ke abhyaas se yogiyon ke shareer ki jadata nasht ho jaati hai. Tab unka shareer hawa mein uth jaata hai ya phir mendhak ki tarah yahaan se wahaan phudakne lagta hai. Jo sant yogaabhyaas nahi karte, ve bhi Ishwar ke prati teevr bhakti ki avastha mein hawa mein oopar uthte paaye gaye hain.”
+
+“Is sant ke vishay mein main adhik jaanna chahta hoon. Kya tum unki saayankaaleen sabhaon mein jaate ho?” Upendra ki aankhein kautuhal se chamak rahi thin.
+
+“Haan, main praayah jaata hoon. Unke upadeshon mein vidyamaan vinod-poorn chutkiyon aur haas-parihaas mein mujhe bada maza aata hai. Kabhi-kabhi mere lambe attahaas se sabha ki gambheerata bhang ho jaati hai. Bhaduri Mahashay to uska bura nahi maante kintu unke shishya kha jaane wali nazaron se meri ore dekhte hain!”
+
+Us din dopahar ko school se ghar laute samay main Bhaduri Mahashay ke ekaant nivaas ke paas se guzar raha tha to unka darshan karne ki ichchha ho gayi. Jansadhaaran ke liye unka darshan durlabh tha. Nichli manzil par akela rahne wala unka ek shishya is baat ka dhyaan rakhta tha ki unke ekaant mein khalal na pade. Yeh shishya kuchh zyada hi anushaasan-priya vyakti tha. Usne mujh se poochha ki kya maine bhent ke liye pehle se samay liya hua hai? Uske Gurudev usi samay wahaan aa pahunche aur unhone mujhe avilamb “bahirgat” kiye jaane se bachaa liya.
+
+“Mukunda jab bhi aana chaahe, use aane diya karo.” Santavar ki aankhein chamak utheen. “Ekaant ka mera niyam meri apni suvidha ke liye nahi balki logon ki suvidha ke liye hai. Sansaari logon ko unke mohjaal ko tahas-nahas kar dene wali spashtavaadita achchhi nahi lagti. Sant na keval durlabh hain, balki ve logon ko vyaakul bhi kar dete hain. Shastra-puranon mein bhi ve praayah jansadhaaran ko vihwal karte paaye jaate hain.”
+
+Main Bhaduri Mahashay ke peechhe-peechhe oopri manzil par sthit unke atyant saade kaksh mein ja pahuncha, jahaan se ve shayad hi kabhi baahar nikalte the. Sansaar ki kshudra uttejanaon ke teevr gati se nitya badalte chitron ki ore santjan praayah koi dhyaan nahi dete; keval yug-yugantar mein sthir hue kaaljayi satyon par unka dhyaan kendrit rahta hai. Santon ke samakaaleen log keval unke sankeern vartamaan ke log hi nahi hote.
+
+“Maharshi! Jahaan tak main jaanta hoon, aap pehle aise yogi hain jo hamesha ghar ke andar hi rahte hain.”
+
+“Bhagwan kabhi-kabhi apne santon ko apratyashit paristhitiyon mein daal dete hain, ki kahin hum yeh na sochein ki hum santon ko ek vishisht niyam ki chaukhath mein bitha sakte hain.”
+
+Aarogya aur shakti se otproot apna shareer unhone padmasan mein sthir kiya. Unki aayu sattar aur assi varsh ke beech thi, parantu aayu ya nishkriya jeevan-paddhati ka koi apriya lakshan unke shareer par nahi tha. Unka sugathit evam seedha shareer pratyek drishti se aadarsh-swaroop tha. Unka mukhamandal puranon mein varnit rishiyon ke samaan tha — bhavya mastak, bharpoor daadhi, shaant aankhein sadaiv Ishwar ki sarvavyaapakta par sthir. Ve sadaiv dridhata ke saath seedhe baithe the.
+
+Hum donon dhyaanasth ho gaye. Ek ghante ke baad unki saumya vaani ne mujhe jaga diya.
+
+“Tum praayah dhyaan lagaate ho, parantu kya tumhein kuchh anubhav hua hai?” Ve mujhe dhyaan se adhik Ishwar se prem karne ka smaran dilaa rahe the. “Saadhan ko hi saadhya samajh lene ki bhool nahi karna.”
+
+Unhone mujhe kuchh aam diye. Apne gambheer swabhaav mein bhi mujhe hamesha hi aanandit karne wali apni vinod-buddhi ko prakat karte hue unhone kaha: “Saadhaaranta logon ko dhyaanyog se jalyog (jalpaan) adhik achchha lagta hai.”
+
+Yog ke vishay mein unki is shabda-kreeda ko sunkar main thahaake lagaakar hansne laga.
+
+“Kya hansi hai tumhari!” Vaatsalya-poorn chamak unki drishti mein prakat hui. Unka apna chehra sadaiv gambheer ho rahta tha, parantu usmein bhi paramaanand-bhari muskaraahat ki jhalak hoti thi. Unke vishaal kamal-nayanon mein sadaiv ek divya hansi chhipi hoti thi.
+
+“Ve patra sudoor sthit America se aaye hain.” Unhone mez par pade anek mote-mote lifaafon ki ore sanket kiya. “Wahaan ki kuchh societies ke saath, jinke sadasya yogshastra mein ruchi rakhte hain, main patra-vyavhaar karta hoon. Ve Columbus se behtar dishaanudeshan ke saath Bharat ki naye sire se khoj kar rahe hain. Unki sahaayata karne mein mujhe khushi hoti hai. Din ke ujaale ki tarah yogshastra ka gyaan bhi un sab ke liye hai jo ise praapt karne ke ichchhuk hain.
+
+“Jise maanav ki mukti ke liye rishiyon ne anivaarya samjha hai use paashchaatya logon ke liye halka karne ki aavashyakta nahi hai. Baahya anubhav bhinna hote hue bhi sabki aatma ek samaan hi hai, aur jab tak yog ka kuchh na kuchh abhyaas nahi kiya jaata, tab tak na hi paashchaatya aur na hi paurvaatya log unnati kar sakte hain.”
+
+Unhone apni shaant drishti mujh par sthir ki. Meri samajh mein tab yeh nahi aaya ki unke vaktavya mein bhavishyavaani-yukt maargdarshan chhipa hua tha. Woh to keval ab, jab main ye shabd likh raha hoon, unke dwara praayah diye gaye sanketon ka poorn arth meri samajh mein aa raha hai ki main kisi din Bharat ki shikshaon ko America le jaaunga.
+
+“Maharshi! Main chahta hoon ki aap jagat ke kalyaan ke liye yogshastra par ek pustak likhein.”
+
+“Main shishyon ko taiyaar kar raha hoon. Ve swayam aur unke shishyon ki shrankhala jeevant pustakon ka kaam karenge jo samay ke swabhaavik kshay aur teekaakaaron ki aswabhaavik teekaon se achhoote rahenge.”
+
+Sandhyaakaal ko unke shishyon ke aane tak main akela hi unke saath raha. Shishyon ke aane ke baad Bhaduri Mahashay ne apna adwiteeya pravachan shuru kiya. Shaant baahya ki tarah apne shrotaon ke man ke kooda-karkat ko baha le jaakar ve unhein Ishwar ki ore le chale. Vishuddh Bangali mein ve hriday-sparshi drishtant dete ja rahe the.
+
+Us din Bhaduri Mahashay sant-sangati ko paane ke liye apne raajsi jeevan ka tyaag karne wali madhyayugeen Rajput rani Meerabai ke jeevan se sambandhit kuchh daarshanik tattvon ko samjha rahe the. Ek baar ek mahaan sanyaasi Sanatan Goswami ne Meerabai se milne se isliye inkaar kar diya ki ve stree thin. Uttar mein Meerabai ne jo kuchh kaha use sunkar Goswami vinamra bankar unke charanon mein nat ho gaye.
+
+“Mahatmaji se kaho,” Meerabai ne kaha, “ki main nahi jaanti thi ki srishti mein Ishwar ke atirikt aur bhi koi purush hai. Kya hum sab unke saamne striyaan nahi hain?” (Shaastron ka ek siddhaant yeh hai ki keval Ishwar hi ekmaatr srijan-ksham purush tattva hai, uski srishti to keval nishkriya maya hai.)
+
+Meerabai ne bhaktiras se otproot anek padon ki rachna ki hai jo aaj bhi Bharat mein prem aur shraddha ke saath gaaye jaate hain. Unmein se ek hai:
+
+Saadhan karna chaahi re manva, bhajan karna chaahi.  
+Prem lagaana chaahi re manva, preet lagaana chaahi ॥  
+Neer-nahan se Hari mile, to jal jantu hoi.  
+Phal-mool khaakar Hari mile, to baadoor bandaraai ॥  
+Tulsi poojanese Hari mile, to main pooju tulsi jhaad.  
+Patthar poojanese Hari mile, to main pooju pahaad ॥  
+Trin bhakshan se Hari mile, to bahut mrigi aja.  
+Stree chhodan se Hari mile, to bahut mile khoja ॥  
+Doodh peevan se Hari mile, to bahut vats baala.  
+Meera kahe bina prem se na mile Nandalala ॥
+
+Bhaduri Mahashay jahaan yaugik aasan mein baithe the, wahin unke paas padi unki khadaaun par kai shishya pranaami rakh dete the. Bharat mein prachalit is shraddha-poorn chadhaave ka arth hai ki shishya apni bhautik sampada guru ke charanon mein arpit kar raha hai. Kritagya mitron ke roop mein Prabhu hi apne bhakton ki dekhbhaal karte rahte hain.
+
+“Gurudev aap mahaan hain!” Us pitaamah-tulya rishi se vida lete samay unki ore bhakti-poorn drishti se dekhte hue ek shishya ne kaha. “Aapne Ishwar ko paane ke liye aur hamein gyaan dene ke liye apni sampatti, aaraam aadi sab kuchh tyaag diya!” Yeh sarvavidit tha ki Bhaduri Mahashay ne bachpan mein hi vishaal paitrik sampatti ko tyaag diya tha, jab unhone ananya-bhaav se yogmaarg mein padaarpan kiya.
+
+“Tum theek ulti baat bol rahe ho!” Bhaduri Mahashay ke mukhaaravind par bhartsana ke atyant saumya bhaav prakat hue. “Maine to antaheen aanand ka viraat saamrajya praapt karne ke liye kuchh thode-se rupaye aur kuchh tuchchh sukh-vilaason ko chhod diya. Phir maine koi tyaag kahaan kiya hai? Aur us nidhi ko baantne mein jo aanand mil sakta hai, uska mujhe gyaan hai. Ise kya tyaag kaha ja sakta hai? Alpadrishti-waale saansaarikjan hi vastav mein sachche tyaagi hain. Ve adwiteeya divya sampatti ko sansaar ke mutthi-bhar tuchchh khilaunon ke liye tyaag dete hain!”
+
+Tyaag ki is lok-viruddh vyaakhya ko sunkar meri hansi chhoot gayi, jismein kisi bhi bhikshuk sant ko to Kuber ka mukut pahnaaya jaata hai aur dhan-garbhit karorpatiyon ko anabhigna shaheed bana diya jaata hai.
+
+“Vidhi ka vidhaan hamare bhavishya ki yojana kisi bhi beema company se adhik achchhi tarah banata hai.” Unke ye nishkarshaatmak shabd unki apni shraddha ka anubhav-siddh dharm tha. “Aaj sansaar baahya suraksha mein hi vishwas karne wale bechain logon se bhara hua hai. Unke katu vichaar unke lalaaton par ankit ghaav-chihnon ke samaan hain. Jisne hamare pratham shwaas ke saath hi hamare liye hawa aur doodh ki vyavastha kar di woh Bhagwan apne bhakton ki din-pratidin ki vyavastha karna bhi jaanta hai.”
+
+School se chhutti hote hi in sant ke dwaar ki teerthyaatra karne ka kram maine jaari rakha. Aantarik utsaah ke saath ve anubhav-laabh mein meri sahaayata karte rahe. Ek din ve mere ghar se door Rammohan Roy Road par rahne ke liye chal gaye. Unke shraddhaalu shishyon ne unke liye wahaan Nagendra Math* naam se ek naya aashram bana diya tha.
+
+Yahaan meri kahaani achaanak kai varsh aage nikal jaati hai, phir bhi Bhaduri Mahashay ke mujh se kahe gaye antim shabdon ka ullekh main yahaan karna chahta hoon. Pashchim ki ore prasthaan karne se kuchh pehle main unke darshan karne gaya aur aashirvaad paane ke liye maine unke charanon par sir rakha.
+
+“Beta! America jaao. Yug-yugantar ki Bharat ki mahima ko apni dhaal ke roop mein le jaao. Vijay tumhare lalaat par likhi hui hai; us desh ke bhale log tumhara hriday-poornak swaagat karenge.”
+
+Sant Joseph is sansaar mein anyamanask rahte the jo vastutah Ishwar mein ananyamanaskata ke kaaran tha. Jis math mein ve rahte the wahaan ke anya sanyaasi unhein bhojan parosne ka kaam kabhi nahi karne dete the, ki kahin bhojan ke bartanon ke saath hi ve chhat tak oopar na uth jaayen. Kisi bhi samay deerghkaal tak zameen par rahne mein ashaksham hone ke kaaran ye sant is sansaar ke kisi bhi kartavya ki poorti ke liye sachmuch ayogy the. Kisi pavitra moorti ka darshan-maatr bhi sant Joseph ko seedhi udaan bharne ki avastha mein le jaane ke liye paryaapt tha, tab ek patthar ke aur doosre high-mass ke, aise do santon ko oopar hawa mein saath-saath ghoomte dekha ja sakta tha.
+
+Avila ki sant Teresa, jinki aatma atyant unnat thi, ki shareer ka ooncha uthna aapattijanakt lagta tha. Sangathan-kaarya ke bhaari uttardayitvon ke kaaran in shareerik “utthanaatmak” anubhavon ko rokne ka unhone kaafi asafal prayaas kiya. “Jab Prabhu kuchh aur hi chaahte hain, tab ye chhoti-chhoti saavadhaaniyaan keval nishphal hoti hain,” unhone likha. Spain ke Alba naamk sthan ke girjaaghar mein rakhe sant Teresa ke paarthi shareer mein chaar shataabdiyaan beet jaane ke baad bhi abhi tak koi haas-prakriya pradarshit nahi hui hai. Unki deh se phoolon ki mahak aati hai. Yeh sthan anganit chamatkaaron ka saakshi raha hai.
+
+`},
+{ title: "Bharat ke Mahaan Vaigyanik Sir Jagadishchandra Bose", text: `
+“Jagadishchandra Bose ne wireless ka aavishkaar Marconi se pehle hi kar liya tha.”
+
+Yeh uttejak tippani sunkar main raaste ke kinare khade hokar vigyaan vishayak charcha kar rahe praadhyaapakon ke ek dal ke paas jaakar khada ho gaya. Yadi unmein sammilit hone ke peechhe meri bhaavna jaati ke abhimaan ki thi, to mujhe uska khed hai. Bharat na keval goodh chintan mein, varan bhautik vigyaan mein bhi pramukh bhoomika nibha sakta hai is baat ke pramaan mein apni gahri abhiruchi ko main asweekaar nahi kar sakta.
+
+“Aap kahna kya chaahte hain, sir?”
+
+Praadhyaapak Mahoday ne prasannata-poorvak spashtikaran diya. “Wireless coherer aur vidyut tarangon ki vakrata darshaane wale ek yantra ka aavishkaar sabse pehle Bose ne kiya tha. Parantu is Bhartiya vaigyanik ne apne aavishkaaron se koi aarthik laabh uthane ki cheshta nahi ki. Sheeghra hi unhone apna dhyaan ajaiv se jaiv jagat ki ore mod diya. Vanaspati-shaastragya ke roop mein unke dwara kiye gaye krantikaari aavishkaar unke bhautik vaigyanik ke roop mein kiye gaye maulik aavishkaaron se bhi kahin adhik badh-chadhakar hain.”
+
+Mere gyaan mein vriddhi karne wale praadhyaapak Mahashay ka maine vinamrata-poorvak dhanyavaad kiya. Unhone aage kaha: “Yeh mahaan vaigyanik Presidency College mein mere sahaadhyaapak hain.”
+
+Doosre hi din main us rishi-tulya mahaan gyaanvetta se milne unke ghar gaya jo mere ghar ke paas hi tha. Lambe samay se main door se hi unke prati shraddha-bhaav rakhta aa raha tha. Gambheer, prashaant aur ekaant-premi vanaspati-shaastragya ne shishtata-poorvak mera swaagat kiya. Unki aayu pachaas se saath varsh ke beech thi. Ve ghane kesh, visteern lalaat tatha swapnil netron ke roopwaan vyakti the. Unka shareer sugathit tha. Bolne mein unka vishuddh uchchaaran unke shuru se hi vaigyanik swabhaav ko darshaata tha.
+
+“Pashchim ki vaigyanik societies ki sabhaon mein bhaag lekar main haal hi mein waapas aaya hoon. Mere dwara aavishkrit jeevan ki avibhaajya ektata darshaane wale upkaranon mein unke sadasyon ne gahri ruchi dikhaayi.* Bose crescograph ki parivardhan-shakti (magnifying power) ek karod guna hai. Microscope to keval kuchh sahasra guna hi parivardhan karta hai, phir bhi usne jeev-vigyaan ko teevr gati pradaan kar di, jeev-vigyaan mein praan phoonk diye. Crescograph anganit maarg kholta hai.”
+
+“Sir! Aapne vigyaan ki amoort baahon se poorv aur pashchim ke aalingan-baddh hone ki prakriya ko tez karne ke liye bahut kuchh kiya hai.”
+
+“Meri shiksha Cambridge mein hui. Prayogon ke aadhaar par hi kisi bhi siddhaant ki sookshm se sookshm jaanch karne ki paashchaatya paddhati kitni saraahaneey hai! Yeh prayog-moolak kaarya-paddhati mujhe apni paurvaatya virasat mein mili aatma-pareekshan ki kshamata ke saath judkar aur bhi adhik prabhaavi ho gayi. In donon ki yuti ne mujhe deerghkaal se abol rahe prakriti-jagat ke maun ko todne mein samarth banaya. Saare bhed khol dene wale mere crescograph† ke rekhachitra pramaan hain sandeh karne wale kisi bhi vyakti ke liye ki ped-paudhon mein bhi sanvedansheel snaayu-tantra hota hai aur unka jeevan vibhinn bhaavnaon se yukt bhi hota hai. Prem, ghrina, aanand, bhay, sukh, dukh, moorchchha aur anya uttejanaon ke prati asankhya prakaar ki pratikriyaon ki bhaavaanubhooti jis prakaar sab praaniyon ko hoti hai, usi prakaar sab ped-paudhon ko bhi hoti hai.”
+
+“Sir, aapke is kshetra mein aagaman se pehle to saari srishti mein vyaapt jeevan ki adwiteeya dhadkan ek kavi ki kalpana maatr lagti hogi! Ek sant ko main kabhi jaanta tha jo kabhi koi phool nahi todte the. Ve kahte the: ‘Gulaab ke paudhe se main uska saundaryaabhimaan kaise chheen loon? Apni uddandata se use vivastr karke uske aatma-samman ko dhakka kaise pahunchaaun?’ Unke un sahaanubhooti-poorn shabdon ko aapke aavishkaaron ne aksharashah yatharth siddh kar diya hai.”
+
+“Kavi satya se antarang hota hai, jab ki vaigyanik ajeebogareeb dhang se us tak pahunchne ka prayaas karta hai. Kisi din meri prayogshaala mein aakar crescograph ke asandigdh pramaanon ko dekh lo.”
+
+Kritagyata-poorvak maine aamantran sweekaar kar un se vida li. Baad mein maine suna ki unhone Presidency College chhod diya hai aur ab ve Kolkata mein ek anusandhaan kendra sthaapit karne ki yojana bana rahe hain.
+
+Jab Bose Institute ka udghaatan hua tab main us udghaatan samaaroh mein upasthit tha. Sainkdon utsaahi log sansthaan ke parisar mein idhar se udhar ghoom rahe the. Vigyaan ke is naye peeth ki kalaatmakta aur aadhyaatmik prateekaamakta ko dekhkar main mugdh hua. Uska praveshdwaar sudoor sthit kisi praacheen mandir ka avashesh hai. Kamalon* se bhare ek jalkund ke peechhe sthit mashaal-dhaari stree moorti naari ke liye amar prakash-daatri ke roop mein Bharat ke aadar ko soochit karti hai. Ek udyaan mein agochar Brahma ko samarpit ek chhota-sa mandir hai. Mandir mein moortiviheen rikt sthan Ishwar ki niraakaarta ko soochit karta hai.
+
+Is udghaatan ke mahaan avsar par Sir Jagadishchandra Bose ka bhaashan aisa lag raha tha maanon woh seedhe kisi antah-prerit praacheen rishi ke mukh se nihsrit ho raha ho.
+
+“Is sanstha ko main aaj keval ek prayogshaala ke roop mein nahi, varan ek mandir ke roop mein samarpit karta hoon.” Unki aadaraneey mahaanata khachaakhach bhare sabhaagrih par ek adrisya chaadar ke samaan chha gayi. “Apni khoj mein main kab padaarth-vigyaan aur prakriti-vigyaan ke seema-kshetra mein pahunch gaya, mujhe pata hi nahi chala. Mera aashcharya badhta hi gaya jab maine dekha ki sajeev jagat aur nirjeev jagat ke beech ki seema-rekhaein mit ti ja rahi hain aur sparsh-bindu ubharte ja rahe hain. Maine dekha ki nirjeev jagat nishkriya nahi tha; woh to asankhya shaktiyon ke prabhaav mein pulakit ho raha tha.
+
+“Sab mein ek-samaan pratikriya dhaatu, vanaspati aur praani ko ek hi saamaanya niyam mein baandhti prateet hui. Ve sab thakaan aur khinnata ke tattvatah ek-samaan lakshan pradarshit karte the jinmein punah taro-taaza aur harshotphull hone ki sambhaavanaein bani rahti thin. Mrityu ke saath judi hui sthaayi pratikriya-heenata ke pradarshan mein bhi sab ek samaan the. Is viraat saamaanyatva se vismay-vibhor hokar maine bahut badi aasha ke saath apne prayogon ke parinaamon ko Royal Society ke samaksh rakha. Parantu wahaan upasthit prakriti-vaigyanikon ne mujhe unke liye surakshit kshetron par atikraman karne ke badle us padaarth-vigyaan ke kshetra tak hi apne anusandhaan ko seemit rakhne ki salaah di jis mein meri safalta ka bharosa tha. Maine anjaane mein ek aparichit jaati-vyavastha ke kshetra mein ghuskar uske shishtachaar ka ullanghan kar diya tha.
+
+“Wahaan anjaane mein ek dharmashaastriya poorvagrah bhi kaaryarat tha jo agyaan ko bhi dharm ke samaan prashnaateet maanta hai. Yeh praayah bhula diya jaata hai ki jis paramasatta ne hamein chaaron ore se srishti ke is nitya badhte hi jaate rahasya se gher rakha hai usi ne prashn karne aur samajhne ki ichchha bhi hum mein pratishthaapit kar di hai. Anek varshon tak logon ki galatfahmiyon ka shikaar bante rahne se ek baat meri samajh mein aa gayi — vigyaan ke upaasaka ka jeevan anivaarya roop se anant sangharsh se bhara hota hai. Laabh aur haani, safalta aur vifalta ko ek samaan maante hue use apna jeevan prem-shraddha-yukt ardh ke roop mein arpan karna padta hai.
+
+“Kaalaantar mein vishwa ki pramukh vaigyanik societies ne mere siddhaanton aur nishkarshon ko sweekaar karke vigyaan mein Bharat ke yogdaan ko maanya kiya. Jo kuchh bhi chhota ya seemit ho, woh kya Bharat ke man ko kabhi tript kar sakta hai? Ek akhand jeevant parampara aur punar-yauvan praapt karne ki ek jeevan-prad shakti ke dwara is bhoomi ne anganit parivartanon mein baar-baar apna kaayaakalp kiya hai. Bharat mein sada hi aise log utpann hote aaye hain jinhone samay ke taatkaalik aur mohak puraskaar ko thukraakar jeevan ke sarvochch abheeshton ko paane ka prayaas kiya hai — akarmanya parityaag dwara nahi, varan karmat, kathor sangharsh dwara. Sangharsh ko asweekaar karne wale durbal ke paas kuchh praapt na kar paane ke kaaran tyaagne ke liye bhi kuchh nahi hota. Jisne sangharsh kar vijay praapt ki ho, wahi keval sansaar ko apni vijay ke anubhav ka phal pradaan kar use samriddh kar sakta hai.
+
+“Is Bose prayogshaala mein jad padaarthon ki pratikriya par ab tak kiye ja chuke kaarya se aur vanaspati-jeevan ke apratyashit tathya saamne aa jaane se padaarth-vigyaan, prakriti-vigyaan, chikitsa, krishi aur yahaan tak ki manovigyaan ke kshetra mein bhi, anusandhaan ke atyant visteern kshetra khul gaye hain. Jin uljhannon ke baare mein ab tak yeh maana jaata tha ki unhein suljhaya nahi ja sakta, ve bhi ab prayogaatmak anveshan ke kaarya-kshetra mein aa gayi hain.
+
+“Parantu kathor sateekta ke bina uchch safalta nahi mil sakti. Isiliye pravesh-kaksh mein apne-apne case mein rakhe gaye mere dwara aavishkrit atisanvedansheel upkaranon aur vaigyanik yantron ki lambi-lambi kataarein...lagi hain. Ve drishyamaan aabhaas ke peechhe chhipe satya ko khojne ke liye aavashyak deerghkaalik anavarat prayatn ki va maanav ke seemit saamarthya ki parisimaaon ko langhne ke liye aavashyak aviraam kathor parishram, lagan aur udyogsheelta ki gaatha sunaate hain. Sabhi aavishkaarak vaigyanik jaante hain ki vaastavik prayogshaala to man hai, jahaan ve maya ke parde ke peechhe chhipe satya ke niyamon ko khoj nikaalte hain.
+
+“Yahaan jo lecture diye jaayenge, ve kisi doosre se praapt gyaan ki punaraavrtti maatr nahi honge. Unmein in kakshon mein pratham baar siddh kiye gaye naye aavishkaaron ka gyaan diya jaayega. Is sanstha ke kaarya-vivaran ke niyamit prakaashanon dwara Bharat ke yogdaan samast vishwa mein pahunch jaayenge. Ve saarvajanik sampatti ban jaayenge. Kabhi bhi kisi bhi baat ka ‘patent’ nahi liya jaayega. Hamari raashtriya sanskriti ka saar hi yeh hai ki hamein gyaan ka prayog keval apne laabh ke liye karne ki sanskritiheenata se sadaiv door rahna chahiye.
+
+“Meri yeh bhi ichchha hai ki is sanstha ki suvidhaein, jahaan tak sambhav ho sake, sabhi deshon ke anusandhaankartaon ke liye uplabdh hon. Ismein main apne desh ki paramparaon ko aage chalaane ka prayaas kar raha hoon. Pachchees shataabdiyon poorv bhi Bharat Nalanda aur Takshashila ke apne praacheen vishwavidyaalayon mein vishwa ke sabhi hissson se aate chhatron ko gyaanpraapti ki suvidha uplabdh karaata tha.
+
+“Vigyaan na to poorv ka hai na pashchim ka, balki apni saarv-lauikikata ke kaaran woh sab deshon ka hai, parantu phir bhi Bharat ismein mahaan yogdaan dene ke liye vishesh roop se yogy hai.* Bhartiyon ki jwalant kalpana-shakti to oopar-oopar paraspar-virodhi lagne wale tathyon ki gutthi se bhi naya sootra nikaal sakti hai, parantu ekaagrata ki aadat ne ise rok rakha hai. Yeh sanyam man ko anant dheeraj ke saath satya ki khoj mein lagaaye rakhne ki shakti pradaan karta hai.”
+
+Us mahaan vaigyanik ke un antim shabdon ko sunkar meri aankhein chhalchhala utheen. Yeh “dheeraj” hi kya sachmuch Bharat ka paryaayvaachi shabd nahi ban gaya hai, jisne kaal aur itihaaskaar, donon ko hi samaan roop se achambhit kar rakha hai?
+
+Udghaatan-divas ke thode dinon baad main us anusandhaan kendra mein phir se gaya. Us mahaan vanaspati-shaastragya ko apne vachan ka smaran tha. Ve mujhe apni shaant prayogshaala mein le gaye.
+
+“Ab main is fern ke paudhe ko crescograph lagaata hoon, iski gatividhiyon ka anek guna parivardhit chitra ubhega. Isi maatra mein yadi ghoghe ki rengne ki kriya ko parivardhit kiya jaaye to ghogha express train ki gati se chalta dikhaayi dega!”
+
+East-West patrika ke April 1934 ke ank mein Vaisheshik shaastra ka saar Tara Mata ke ek lekh mein is prakaar diya gaya tha: “Aadhunik anu-siddhaant ki saamaanyata vigyaan ki nayi khoj maana jaata hai, parantu anek shataabdiyon poorv Kanada ne iski atyant sundar reeti se vyaakhya ki thi. Sanskrit ke anu ka Greek ke atom mein yatharth anuvaad kiya ja sakta hai kyunki atom ka Greek mein shabdashah arth hota hai akhand ya avibhaajya. Eesa poorv kaal ke Vaisheshik saahitya ke anya vaigyanik bhaashyon mein shaamil hain: (1) suiyon ka chumbak ki ore sarakna, (2) ped-paudhon mein jal ka abhisaran, (3) aakaash tattva kriya-shoonya aur gathan-rahit hone se sookshm shaktiyon ke sanchaar ka aadhaar hai, (4) saur-agni sabhi prakaar ki ushnata ka mool hai, (5) ushnata hi aanvik parivartan ka kaaran hai, (6) prithvi ke anuon mein woh gun nihit hai jo unhein aakarshan-shakti ya adhomukhi khinchaav pradaan karta hai; isi gun ke kaaran gurutvaakarshan niyam ka astitva hai, (7) sabhi prakaar ki oorja gati-moolak hai aur iska kaaran oorja ke vyay mein ya gati ke punar-vitran mein nihit hai, (8) anu-vighatan se srishti ka lop (pralay), (9) atyant sookshm kanikaaon ke sab dishaon mein akalpaneey gati se jhapatne se ushnata aur prakash ki kiranein banti hain aur prasaarit hoti hain [aadhunik cosmic rays ka siddhaant], (10) kaal aur desh ki maapein.
+
+“Vaisheshik darshan ke anusaar vishwa ki utpatti anuon se hi hui hai. Maulik vishishtataon mein ya prakriti mein anu shaashwat hai. In anuon ko nitya spandan-gati-yukt maana jaata tha, Yeh aadhunik aavishkaar ki pratyek anu ek laghu sauramandal hai, praacheen Vaisheshik daarshanikon ke liye koi nayi baat nahi hoti. Unhone to samay ko bhi ganit ki antim sankalpana tak vibhaajit kar diya hai jismein samay ki sabse chhoti unit (kala) woh avadhi hai jo ek anu ko apne avakaash mein ghoomne mein lagti hai.”
+
+Meri drishti utsukta-vash parde par lagi hui thi jahaan fern ki parivardhit chhaya deekh rahi thi. Sookshmaatisookshm jaiv-kriyaein bhi ab spasht dikhaayi de rahi thin, meri mantra-mugdh aankhon ke saamne woh fern ka paudha atyant dheere-dheere badh raha tha. Bose Mahashay ne paudhe ki nonk ko dhaatu ki ek chhoti-si chhad se chhua. Parde par chal raha mook-nritya hathaat rook gaya, jaise hi chhad hataayi vaise hi uski lay-baddh thirak punah shuru ho gayi.
+
+“Tumne dekha kaise tanik-sa bhi baahya hastakshep sanvedansheel uttakon ke liye baadhak hai,” Bose Mahashay ne kaha. “Ab dekho; main ise chloroform doonga aur phir uska prabhaav nasht karne wali aushadhi bhi.”
+
+Chloroform ke prabhaav ne vikaas ko poorntah rok diya; uska prabhaav nasht karne wali aushadhi ne use punah shuru kar diya. Parde par dikhne wale vikaas ke sanketon ne mujhe kisi cinema ke kathaanak se bhi adhik tanmayata ke saath jakad rakha tha. Bose Mahashay (yahaan khalnaayak ki bhoomika mein) ne us fern ke ek hisse mein ek teekshn aujar ghusa diya; aakasmik phadphadaahat ne dard ka sanket diya. Jab unhone paudhe ke tane ko blade se anshatah kaat diya tab chhaya mein teevr chhatpataahat dikhaayi di, phir mrityu ki antim stabdhata mein woh shaant ho gayi.
+
+“Ek vishaal vriksh ko pehle chloroform dekar phir uska sthanaantarann karne mein maine safalta praapt kar li. Saadhaaranta vanon ke ye raja sthanaantarit karne ke kuchh hi din baad mar jaate hain.” Us jeevan-rakshak yukti-kaushal ka varnan karte hue Bose Mahashay atyant prasannata ke saath muskara rahe the. “Mere sookshmgrahi yantron ke rekhachitron ne siddh kar diya hai ki ped-paudhon mein ras-sanchaar-pranaali hoti hai; praaniyon mein jaise rakt-sanchaar hota hai, vaise hi ped-paudhon mein ras-sanchaar hota hai. Ped-paudhon mein ras ki oordhvagati ko keval keshika aakarshan (capillary attraction) sadrish kisi yaantrik kriya ke aadhaar par spasht nahi kiya ja sakta, jaisa ki saamaanyata prayaas kiya jaata hai. Crescograph ne ise sajeev koshikaaon ki kriya ke roop mein darshaaya hai. Ped ke andar se lambi golakaar nali chalti hai jismein kramik vritton mein sikudne wali lahrein uthti rahti hain jo hriday ka kaam karti hai! Hum jitni hi adhik gaharaai mein jaakar dekhenge utni hi adhik spashtata se is satya ka pramaan milta jaata hai ki is bahuvidh prakriti ka pratyek roop ek hi sootra mein bandha hai.”
+
+Bose Mahashay ne ek anya Bose yantra ki ore ishaara kiya.
+
+“Main tumhein tin ke ek tukde par kuchh prayog dikhaata hoon. Dhaatuon ki praan-shakti uttejana ke prabhaav mein anukool ya pratikool pratikriya dikhaati hai. Syaahi ke nishaan vibhinn pratikriyaon ko chihnaankit karenge.”
+
+Main talleen hokar aanvik sanrachana ki lakshan-swaroop tarangon ko ankit karne wale rekhachitra (graph) ko dekhne laga. Jab Professor Sahab ne tin ko chloroform lagaaya tab kampan-lekhan tham gaya. Jab dheere-dheere us tin ki saamaanya avastha laut aayi, tab woh punah shuru ho gaya. Ab Bose Mahashay ne ek vishaela rasaayan lagaaya. Tin ke chhatpataate chor ke saath-saath sui ne adbhut roop se rekhachitra par mrityu ki soochna ankit kar di. Vaigyanik Mahoday ne kaha:
+
+“Bose yantron ne pradarshit kar diya hai ki kanchi aur machinery mein prayukt ispat sadrish dhaatu bhi thakte hain aur beech-beech mein vishraam milne se unmein punah taazgi aur kaarya-kshamata aa jaati hai. Vidyut-pravaah ya ati bhaari dabaav se dhaatuon mein jeevan ki dhadkan ko gambheer kshati pahunchati hai ya woh dhadkan sada ke liye ruk bhi sakti hai.”
+
+Us kaksh mein chaaron ore rakhe athak pratibha ke mukhar prateek, asankhya aavishkaaron par maine drishti daudaayi.
+
+“Sir, yeh dukh ki baat hai ki aapke adbhut yantron ka poorn laabh uthaakar bade paimane par krishi-vikaas ko gati nahi di ja rahi hai. Inmein se kuchh yantron ko tvarit prayogon mein prayukt kar ke khaad ke vibhinn prakaaron ka paudhon par kya prabhaav padta hai, yeh dekhna kya sahaj sambhav nahi ho sakta?”
+
+“Tum theek kah rahe ho. Bhavi peedhiyaan Bose yantron ko anganit prakaaron se prayog mein laayengi. Vaigyanik ko uske parishram ka tatkaal puraskaar kadaachit hi milta hai; srijanaatmak seva ka aanand hi uske liye paryaapt hai.”
+
+Us adamya rishi ke prati apni haardik kritagyata vyakt kar maine unse vida li. Maine socha, “Unki adbhut pratibha ki vismaykaari urvarata kya kabhi nihshesh ho sakti hai?”
+
+Badhte varshon ke saath unki pratibha mein koi kami nahi aayi. “Resonant Cardiograph” naamk ek jatil yantra ka aavishkaar karne ke baad Bose Mahashay asankhya Bhartiya ped-paudhon ke visteern anusandhaan mein lag gaye. Kisi ko kalpana bhi nahi thi aisi-aisi upayukt aushadhiyon ki ek viraat bheshaj-taalika taiyaar ho gayi. Cardiograph aisi achoo sateekta ke saath taiyaar kiya gaya hai ki usse ek second ka shataansh tak rekhachitra mein ankit ho jaata hai. Ped-paudhe, praani evam maanav-shareer ki sanrachana ke sookshmaatisookshm spandan bhi yeh cardiograph ankit kar leta hai. Us mahaan vanaspati-shaastragya ne bhavishyavaani ki ki vaidyaakiya anusandhaan ke liye praaniyon ke ang-chhedan ki aavashyakta nahi rahegi; cardiograph ke prayog se ped-paudhon ke ang-chhedan se hi kaam chal jaayega.
+
+“Kisi aushadhi ke paudhe aur praani par ek saath kiye gaye prayog ke parinaamon ke ankan se saaf pata chalta hai ki un donon par us aushadhi ke prabhaav mein aashcharyajanak samaanta hai,” unhone spasht kiya. “Manushya mein jo kuchh bhi hai us sab ka poorvaabhaas ped-paudhon mein vidyamaan hai. Vanaspati jagat par prayog praaniyon aur maanavon ki yaatana ko kam karne mein yogdaan denge.”
+
+Kai varshon ke baad Bose Mahashay ke path-pradarshak vanaspati aavishkaaron ki anya vaigyanikon dwara pushti ki gayi. Columbia University mein 1938 mein kiye gaye shodh-kaarya ki vaarta “The New York Times” mein nimnalikhit roop mein prakaashit hui thi:
+
+Gat katipay varshon mein yeh nirdhaarit ho chuka hai ki jab mastishk aur shareer ke anya hissson ke beech tantrikaein (nerves) sandesh vahan karti hain, tab chhoti-chhoti vidyut tarangein nirman hoti hain. In vidyut tarangon ko sookshmgrahi vidyudgaaramaapi yantron (galvanometers) se maapa gaya aur aadhunik parivardhanakaari yantron se inka laksh-laksh guna parivardhan kiya gaya. Maanav ya jeevit praaniyon ke tantrika-tantuon (nerve fibres) mein pravaahit hone wali in tarangon ka adhyayan karne ka koi santoshjanak tareeka inki atyant teevr gati ke kaaran ab tak dhoondha nahi ja saka tha.
+
+Dr. K. S. Cole aur Dr. H. J. Curtis ne yeh jaankaari di ki unhone is baat ko khoj nikaala hai ki saadhaaranta gharon mein machhli-paatr mein daala jaane wala jo meethe paani mein jeene wala paudha hota hai, jise Nitella kahte hain aur jismein ek hi lambi koshika hoti hai, uski koshika mein aur tantri-tantu ki koshikaaon mein poorn samaanta hai, koi bhi bhinnta nahi hai. Iske atirikt unhone yeh bhi paaya ki Nitella paudhe ke tantuon ko uttejit kiye jaane par ve vidyut tarangein nirman karte hain jo, keval gati ko chhodkar, anya sab drishtiyon se praani aur maanav ke tantri-tantuon mein nirman hone wali vidyut tarangon ke samaan hi hoti hain. Is paudhe ke tantuon ki vidyut tarangein praaniyon ke tantuon ki vidyut tarangon se kahin dheeme chalti dekhī gayeen. Isliye tantrikaaon mein pravaahit hone wali vidyut tarangon ke pravaah ke mand-gati chalchitra (slow motion pictures) lene ke liye Columbia University ke anusandhaankartaon ne is aavishkaar ko turant upyog mein laaya.
+
+Is prakaar Nitella paudha man aur sthool jagat ke seema-kshetra ke gupt rahasyon ki goodhlipi ka arth jaanne mein ek prakaar se Rosetta stone* ki bhoomika ada kar sakta hai.
+
+* Napoleon ki sena ke afsar Rosetta ko Misr mein ek prastar-khand mila tha jis par teen lipiyon mein lekh utkeern the. Uski sahaayata se praacheen Misr ki lipiyaan padh li gayeen.
+
+Kavivar Rabindranath Tagore Bharat ke is aadarshvaadi vaigyanik ke antarang mitra the. Unhein sambodhit kar kavivar ne nimnalikhit panktiyaan likhi thin:
+
+He tapasvi daako tumi saam-mantre* jalad-garjane,  
+“Uttishthat! Nibodhata!” daako shaastra-abhimaani-jane —  
+Paandityer pandatarke hate. Suvrihat vishwa-tale  
+Daako moodh daambh kere. Daak daao tab shishya dale —  
+Ekatre daandaak taara tab hom-hutaagni ghiria.  
+Baar-baar e Bharat aapnaate aasuk phiria  
+Nishthaay, shraddhaay, dhyaane-basuk se apramatta-chitte  
+Lobh-heen, dwandwa-heen, shuddh, shaant gurur vedite.
+
+* Tagore ki is kavita mein ullekhitsaam chaar Vedon mein se ek Ved hai. Anya teen hain Rigveda, Yajurveda aur Atharvaveda. Ye pavitra granth Brahma ya srashta ke swaroop ka varnan karte hain jo manushya mein aatma ke roop mein sthit hota hai. Brahma shabd ‘brih’ dhaatu se bana hai, jiska arth hai “vistarit hona.” Is mein swatah hi vistarīt hone wali Ishwariya shakti ko Vaidik sankalpana spasht hoti hai. Brahmaand ka vistaar makdi-jaal ki tarah usi Brahma se hota hai. Aatma ki Brahma ke saath saayujyata ko hi Vedon ka saar kaha ja sakta hai.
+
+Vedon ke saar, Vedanta ne kai mahaan paashchaatya vichaarakon ko prerana di hai. French itihaaskaar Victor Cousin ne kaha tha: “Jab hum poorv ki — aur sarvopari Bharat ki — daarshanik garima ka manoyog-poorvak adhyayan karte hain, tab hamein unmein aise-aise gahan satyon ka darshan hota hai ... ki hum poorv ke darshan ke aage apne aap natmastak ho jaate hain aur hamein yeh maanna hi padta hai ki maanavjaati ki yeh aadya leela-sthali hi sarvochch darshan ki janmabhoomi hai.” Schlegel ne kaha tha: “Europeyon ka bhavyatam darshan, jo Yunaani daarshanikon dwara prastut kiya gaya vishleshanaatmak aadarshvaad hai, woh bhi paurvaatya aadarshvaad ki praan-prachurta aur sphoorti ki tulna mein aisa prateet hota hai maanon madhyaahn ke soorya ke prachand aalok ke samaksh ek ksheen sphuling maatr hai.”
+
+Bharat ke viraat saahitya bhandaar mein Ved (vid dhaatu se, jiska arth hai jaanna) hi aise granth hain jinke rachayita ka kahin koi ullekh nahi. Rigveda (10:10, 9) mein un mantron ki utpatti apaurusheya bataayi gayi hai. Rigveda (3:39, 2) mein kaha gaya hai ki ve ati-praacheen kaal se prachalit chale aa rahe hain aur nayi bhaasha mein punar-gathit kiye gaye hain. Yug-yugantar mein rishiyon ko seedhe Ishwar se mile Vedon ko nityatva-yukt ya kaal-baadhaateet kaha jaata hai.
+
+Ved, dhvani ke maadhyam se rishiyon ko mile, rishiyon ne unhein pratyaksh suna, isliye unhein Shruti kaha jaata hai. Moolatah ye ‘stav’ aur ‘paath’ karne ka sangrah hai. Isiliye sahastraavadhi varshon tak Vedon ki ek laakh richaon ko kabhi likha nahi gaya; ve Brahman purohiton dwara vaani se hi hastantarit kiye jaate the. Patthar aur kaagaz, donon hi kaal ke dwara mitaaye ja sakte hain. Ved jo lupt na hokar yug-yugantar se mool swaroop mein chale aa rahe hain, uska kaaran yahi hai ki rishigan jaante the ki Ved-gyaan ke hastantaran ke liye jad padaarthon ki apeksha man hi shreshth saadhan hai. “Hrit-patal” se adhik shreshth kya ho sakta hai?
+
+Jis kram mein Vaidik shabd aate hain (anupoorvi), usi kram mein unhein banaaye rakhne ki vishisht paddhati ka, shabd-sandhi ke niyamon ka tatha akshar-sambandhon ke niyamon ka anusarann kar aur kanthasth kiye hue Ved-mantron ki vishuddhata ko vishisht ganitiya reetiyon se pramaanit kar Brahman adwiteeya dhang se Vedon ke mool roop ki raksha karte aaye hain. Pratyek Ved-shabd ke pratyek akshar ka vishisht mahattva aur saamarthya hai.
+
+“He tapasvi! Saam-mantron ki jalad gambheer garjana se pukaaro —  
+“Utho! Jaago!” Shaastra-abhimaani janon aur kutarkon se aahat buddhi panditon ko pukaaro aur unhein bekaar tarkon ka tyaag karne ko kaho. Un moodh dambhiyon ko is suvistarit sansaar mein aane ki prerana do. Apne shishyon ka bhi aahwaan karo ki ve kartavya-roopi yagya-vedi ke chaaron ore ekatrit hon, jisse hamara Bharat, hamara praacheen desh apne sachche swaroop ko punah praapt kare aur kartavya-nishtha, shraddha aur dhyaan mein apramatta-chitt hokar lobh-heen, dwandwa-heen, shuddh aur shaant bankar vishwaguru ke aasan par ek baar phir adhishthit ho.”
+`}
+    ]
+  }
+];
+
+/* ======================= Reader engine (no need to edit) ======================= */
+const $=s=>document.querySelector(s), G=24;
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+let prefs=Object.assign({fs:19,ff:"serif",lh:1.7,m:1,t:""},store.get("rd:prefs",{}));
+let book=null,ci=0,pi=0,pages=1,W=0,H=0,lens=[],total=0,pos={};
+
+function applyPrefs(){
+  document.documentElement.style.setProperty("--fs",prefs.fs+"px");
+  document.documentElement.style.setProperty("--lh",prefs.lh);
+  document.body.dataset.t=prefs.t;
+  $("#tx").classList.toggle("sans",prefs.ff==="sans");
+  document.querySelectorAll("#set [data-f]").forEach(b=>b.classList.toggle("on",b.dataset.f===prefs.ff));
+  document.querySelectorAll("#set [data-l]").forEach(b=>b.classList.toggle("on",+b.dataset.l===prefs.lh));
+  document.querySelectorAll("#set [data-m]").forEach(b=>b.classList.toggle("on",+b.dataset.m===prefs.m));
+  document.querySelectorAll("#set .sw").forEach(b=>b.classList.toggle("on",b.dataset.t===prefs.t));
+  store.set("rd:prefs",prefs);
+}
+
+/* Library */
+function hue(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return h}
+function bookPct(b){const p=pos[b.id];if(!p)return 0;const L=b.chapters.map(c=>c.text.length),T=L.reduce((a,x)=>a+x,0)||1;return Math.min(100,Math.round((L.slice(0,p.c).reduce((a,x)=>a+x,0)+L[p.c]*p.f)/T*100))}
+function renderLib(){
+  pos=store.get("rd:pos",{});
+  $("#libTitle").textContent=LIBRARY.title;$("#libSub").textContent=LIBRARY.subtitle;document.title=LIBRARY.title;
+  $("#grid").innerHTML=BOOKS.map((b,i)=>{
+    const h=hue(b.title),pct=bookPct(b);
+    const cv=b.cover?`<div class="cover"><img src="${b.cover}" alt="Cover of ${esc(b.title)}" loading="lazy"></div>`
+      :`<div class="cover gen" style="background:linear-gradient(160deg,hsl(${h} 38% 34%),hsl(${(h+40)%360} 45% 20%))"><b>${esc(b.title)}</b><i>${esc(b.author||"")}</i></div>`;
+    return `<button class="book" data-i="${i}">${cv}<div class="bt">${esc(b.title)}</div><div class="ba sans">${esc(b.author||"")}</div>${pct?`<div class="bp"><span style="width:${pct}%"></span></div><div class="bs sans">${pct}% read</div>`:`<div class="bs sans">${b.chapters.length} chapter${b.chapters.length>1?"s":""}</div>`}</button>`}).join("");
+}
+$("#grid").onclick=e=>{const b=e.target.closest(".book");if(b)openBook(+b.dataset.i)};
+
+/* Open / close */
+function openBook(i){
+  book=BOOKS[i];lens=book.chapters.map(c=>c.text.length);total=lens.reduce((a,x)=>a+x,0)||1;
+  const p=pos[book.id]||{c:0,f:0};
+  $("#lib").classList.add("hidden");$("#rd").classList.remove("hidden");
+  $("#bookT").textContent=book.title;document.title=book.title;
+  $("#toc").innerHTML=`<h4>${esc(book.title)}</h4>`+book.chapters.map((c,k)=>`<button data-c="${k}">${esc(c.title)}</button>`).join("");
+  hideChrome();applyPrefs();loadChapter(Math.min(p.c,book.chapters.length-1),p.f);
+}
+function closeBook(){save();$("#rd").classList.add("hidden");$("#lib").classList.remove("hidden");book=null;renderLib()}
+
+/* Chapter rendering + pagination (CSS columns) */
+function chapterHTML(c,n){
+  const parts=c.text.trim().split(/\n\s*\n/).map(s=>s.trim().replace(/\s*\n\s*/g," ")).filter(Boolean);
+  return `<div class="k">Chapter ${n}</div><h2>${esc(c.title)}</h2>`+parts.map(p=>p.startsWith("## ")?`<h3>${esc(p.slice(3))}</h3>`:`<p>${esc(p)}</p>`).join("")+`<p class="end">&#9702; &#9702; &#9702;</p>`;
+}
+function layout(frac){
+  const vp=$("#vp"),pad=[14,28,56][prefs.m]*(vp.clientWidth<700?.6:1)+ (vp.clientWidth<700?4:10)*(prefs.m+1);
+  W=Math.floor(Math.min(vp.clientWidth-pad*2,[760,680,560][prefs.m]));
+  H=Math.floor(vp.clientHeight-(vp.clientWidth<700?28:56));
+  const pg=$("#pg"),tx=$("#tx");
+  pg.style.width=W+"px";pg.style.height=H+"px";
+  tx.style.width=W+"px";tx.style.columnWidth=W+"px";tx.style.columnGap=G+"px";
+  pages=Math.max(1,Math.round((tx.scrollWidth+G)/(W+G)));
+  pi=Math.min(pages-1,Math.round(frac*pages));
+  show(false);
+}
+function loadChapter(c,frac){
+  ci=c;$("#tx").innerHTML=chapterHTML(book.chapters[c],c+1);
+  document.querySelectorAll("#toc button").forEach(b=>b.classList.toggle("on",+b.dataset.c===c));
+  layout(frac||0);
+}
+function show(flash=true){
+  const tx=$("#tx");
+  const go=()=>{tx.style.transform=`translateX(${-pi*(W+G)}px)`;tx.classList.remove("fade");progress();save()};
+  if(flash){tx.classList.add("fade");setTimeout(go,90)}else go();
+}
+function progress(){
+  const f=pi/pages,done=lens.slice(0,ci).reduce((a,x)=>a+x,0)+lens[ci]*(pages>1?pi/(pages-1):1);
+  const pct=Math.min(100,Math.round(done/total*100));
+  $("#barF").style.width=pct+"%";
+  $("#fl").textContent=book.chapters[ci].title;
+  $("#fr").textContent=`Page ${pi+1} of ${pages} \u2022 ${pct}%`;
+}
+function save(){if(!book)return;pos[book.id]={c:ci,f:pi/pages};store.set("rd:pos",pos)}
+function next(){if(pi<pages-1){pi++;show()}else if(ci<book.chapters.length-1){loadChapter(ci+1,0)}}
+function prev(){if(pi>0){pi--;show()}else if(ci>0){loadChapter(ci-1,.999)}}
+
+/* UI */
+function hideChrome(){$("#top").classList.add("off");closePanels()}
+function closePanels(){["#toc","#set","#shade"].forEach(s=>$(s).classList.add("hidden"))}
+function panel(id){const o=!$(id).classList.contains("hidden");closePanels();if(!o){$(id).classList.remove("hidden");$("#shade").classList.remove("hidden")}}
+$("#vp").onclick=e=>{
+  if(swiped){swiped=false;return}
+  const x=e.clientX/innerWidth;
+  if(x<.3)prev();else if(x>.7)next();else $("#top").classList.toggle("off");
+  closePanels();
+};
+$("#shade").onclick=closePanels;
+$("#back").onclick=closeBook;
+$("#tocBtn").onclick=()=>panel("#toc");
+$("#setBtn").onclick=()=>panel("#set");
+$("#toc").onclick=e=>{const b=e.target.closest("button");if(b){hideChrome();loadChapter(+b.dataset.c,0)}};
+$("#set").onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+  if(d.a)prefs.fs=Math.max(14,Math.min(30,prefs.fs+(d.a==="fs+"?1:-1)));
+  if(d.f)prefs.ff=d.f; if(d.l)prefs.lh=+d.l; if(d.m)prefs.m=+d.m; if("t" in d)prefs.t=d.t;
+  applyPrefs();layout(pi/pages);
+};
+let sx=0,sy=0,swiped=false;
+$("#vp").addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+$("#vp").addEventListener("touchend",e=>{
+  const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5){swiped=true;dx<0?next():prev();setTimeout(()=>swiped=false,350)}
+},{passive:true});
+addEventListener("keydown",e=>{
+  if(!book)return;
+  if(["ArrowRight","PageDown"," "].includes(e.key)){e.preventDefault();next()}
+  else if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();prev()}
+  else if(e.key==="Escape"){closePanels()}
+});
+let rz;addEventListener("resize",()=>{if(!book)return;clearTimeout(rz);rz=setTimeout(()=>layout(pi/pages),150)});
+
+applyPrefs();renderLib();
+</script>
+</body>
+</html>
