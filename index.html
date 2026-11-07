@@ -9,6 +9,9 @@
 [data-t=sepia]{--bg:#f3ead4;--fg:#3f3123;--mute:#8a7a62;--line:#e0d4b6;--card:#f9f2df;--accent:#7a4b1e}
 [data-t=gray]{--bg:#e4e4e0;--fg:#161616;--mute:#66665f;--line:#cfcfc9;--card:#ececE8;--accent:#333}
 [data-t=dark]{--bg:#121212;--fg:#c8c5be;--mute:#7b7871;--line:#2a2a2a;--card:#1b1b1b;--accent:#9db7d3}
+[data-night="1"]{--bg:#15110d;--fg:#cdb995;--mute:#85765e;--line:#2b231a;--card:#1e1812;--accent:#e0a458}
+#dim{position:fixed;inset:0;z-index:99;background:#000;pointer-events:none;opacity:0;transition:opacity .15s}
+input[type=range]{width:150px;accent-color:var(--accent);height:28px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--fg);font-family:var(--ff);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);overflow:hidden}
@@ -58,7 +61,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .bar{height:2px;background:var(--line);flex:none}
 .bar span{display:block;height:100%;background:var(--fg);opacity:.55;width:0}
 .panel{position:absolute;z-index:6;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 40px -10px rgba(0,0,0,.4)}
-#set{top:calc(60px + env(safe-area-inset-top));right:10px;width:min(320px,calc(100% - 20px));padding:16px}
+#set{top:calc(60px + env(safe-area-inset-top));right:10px;width:min(330px,calc(100% - 20px));padding:16px;max-height:calc(100% - 80px);overflow-y:auto}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;font-size:.85rem}
 .row:last-child{margin-bottom:0}
 .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
@@ -77,6 +80,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 </style>
 </head>
 <body>
+<div id="dim"></div>
 
 <!-- ============ LIBRARY ============ -->
 <main id="lib">
@@ -93,6 +97,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
     <button class="ib" id="back" aria-label="Back to library">&#8592;</button>
     <button class="ib" id="tocBtn" aria-label="Chapters">&#9776;</button>
     <div class="t" id="bookT"></div>
+    <button class="ib" id="nightBtn" aria-label="Toggle night mode">&#9790;</button>
     <button class="ib" id="setBtn" aria-label="Reading settings">Aa</button>
   </div>
   <div id="vp"><div id="pg"><div id="tx"></div></div></div>
@@ -111,20 +116,12 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
       <button class="sw" data-t="sepia" style="background:#f3ead4" aria-label="Sepia"></button>
       <button class="sw" data-t="gray" style="background:#e4e4e0" aria-label="E-ink gray"></button>
       <button class="sw" data-t="dark" style="background:#121212" aria-label="Dark"></button></div></div>
+    <div class="row"><span>Night mode</span><div class="seg"><button data-n="0">Off</button><button data-n="1">On</button></div></div>
+    <div class="row"><span>Brightness</span><input type="range" id="bri" min="30" max="100" step="1" aria-label="Brightness"></div>
   </div>
 </section>
 
 <script>
-/* =====================================================================
-   HOW TO ADD YOUR BOOKS
-   1. In Google Docs: File > Download > Plain text (.txt), or just copy.
-   2. Add a book object to BOOKS below.
-   3. Paste each chapter between the backticks of `text`.
-      - Leave a blank line between paragraphs.
-      - Start a line with "## " for a sub-heading inside a chapter.
-   4. cover: paste an image URL or a data: URI. Leave "" to auto-generate one.
-   Note: if your text contains a backtick (`) or "${", put a backslash before it.
-   ===================================================================== */
 const LIBRARY = { title: "My Library", subtitle: "Choose a book to start reading." };
 
 const BOOKS = [
@@ -1388,13 +1385,17 @@ Jis kram mein Vaidik shabd aate hain (anupoorvi), usi kram mein unhein banaaye r
 const $=s=>document.querySelector(s), G=24;
 const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-let prefs=Object.assign({fs:19,ff:"serif",lh:1.7,m:1,t:""},store.get("rd:prefs",{}));
+let prefs=Object.assign({fs:19,ff:"serif",lh:1.7,m:1,t:"",b:1,n:0},store.get("rd:prefs",{}));
 let book=null,ci=0,pi=0,pages=1,W=0,H=0,lens=[],total=0,pos={};
 
 function applyPrefs(){
   document.documentElement.style.setProperty("--fs",prefs.fs+"px");
   document.documentElement.style.setProperty("--lh",prefs.lh);
   document.body.dataset.t=prefs.t;
+  if(prefs.n)document.body.dataset.night="1";else delete document.body.dataset.night;
+  $("#dim").style.opacity=(1-prefs.b).toFixed(2);
+  $("#bri").value=Math.round(prefs.b*100);
+  document.querySelectorAll("#set [data-n]").forEach(b=>b.classList.toggle("on",+b.dataset.n===prefs.n));
   $("#tx").classList.toggle("sans",prefs.ff==="sans");
   document.querySelectorAll("#set [data-f]").forEach(b=>b.classList.toggle("on",b.dataset.f===prefs.ff));
   document.querySelectorAll("#set [data-l]").forEach(b=>b.classList.toggle("on",+b.dataset.l===prefs.lh));
@@ -1483,9 +1484,11 @@ $("#toc").onclick=e=>{const b=e.target.closest("button");if(b){hideChrome();load
 $("#set").onclick=e=>{
   const b=e.target.closest("button");if(!b)return;const d=b.dataset;
   if(d.a)prefs.fs=Math.max(14,Math.min(30,prefs.fs+(d.a==="fs+"?1:-1)));
-  if(d.f)prefs.ff=d.f; if(d.l)prefs.lh=+d.l; if(d.m)prefs.m=+d.m; if("t" in d)prefs.t=d.t;
+  if(d.f)prefs.ff=d.f; if(d.l)prefs.lh=+d.l; if(d.m)prefs.m=+d.m; if(d.n)prefs.n=+d.n; else if(d.n==="0")prefs.n=0; if("t" in d)prefs.t=d.t;
   applyPrefs();layout(pi/pages);
 };
+$("#bri").oninput=e=>{prefs.b=e.target.value/100;applyPrefs()};
+$("#nightBtn").onclick=()=>{prefs.n=prefs.n?0:1;applyPrefs()};
 let sx=0,sy=0,swiped=false;
 $("#vp").addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
 $("#vp").addEventListener("touchend",e=>{
